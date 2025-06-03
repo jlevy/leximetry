@@ -5,8 +5,9 @@ from textwrap import dedent
 from pydantic_ai import Agent
 from pydantic_ai.models import Model, infer_model
 from rich import print as rprint
+from strif import abbrev_str
 
-from leximetry.cli.metrics_model import (
+from leximetry.model.metrics_model import (
     Expression,
     Groundedness,
     Impact,
@@ -17,21 +18,9 @@ from leximetry.cli.metrics_model import (
 )
 
 
-def create_model(model_name: str = "gpt-4o-mini"):
-    """
-    Create a PydanticAI model instance using built-in model inference.
-
-    Supports popular models with automatic provider detection ('gpt-4o',
-    'claude-3-5-sonnet-latest', 'gemini-2.0-flash') or with an explicit provider
-    'openai:gpt-4o', 'anthropic:claude-3-5-sonnet-latest'
-
-    """
-    return infer_model(model_name)
-
-
 async def evaluate_single_metric(text: str, metric: MetricRubric, model: Model) -> tuple[str, int]:
     """
-    Evaluate text for a single metric and return (`metric_name`, `score`).
+    Evaluate text for a single metric and return `(metric_name, score)`.
     """
     # Format the metric values for the prompt
     values_desc = "\n".join([f"{score}: {desc}" for score, desc in metric.values.items()])
@@ -47,7 +36,7 @@ async def evaluate_single_metric(text: str, metric: MetricRubric, model: Model) 
         TEXT TO EVALUATE:
         {text}
         
-        Return only the numeric score (1-{max(metric.values.keys())}) that best matches the text quality for this metric.
+        Return only the numeric score (1-{max(metric.values.keys())}) that best describes the text, using the scoring scale above.
         If there isn't enough text to assess this metric, return 0.
     """)
 
@@ -55,9 +44,11 @@ async def evaluate_single_metric(text: str, metric: MetricRubric, model: Model) 
     single_metric_agent = Agent(
         model=model,
         output_type=int,
-        instructions="You are evaluating text quality. Return only the numeric score that best matches the criteria.",
+        instructions="You are evaluating metrics about a text excerpt. "
+        "Return only the numeric score that best matches the criteria.",
     )
 
+    rprint(f"Evaluating {metric.name} with prompt: {abbrev_str(prompt)}")
     result = await single_metric_agent.run(prompt)
     return metric.name.lower(), result.output
 
@@ -65,6 +56,7 @@ async def evaluate_single_metric(text: str, metric: MetricRubric, model: Model) 
 async def evaluate_text_async(text: str, model_name: str = "gpt-4o-mini") -> str:
     """
     Evaluate text by calling the LLM once for each metric and assembling results.
+    The `model_name` is a Pydantic model name like "gpt-4o-mini" or "claude-3-5-sonnet-latest".
     """
     if not text.strip():
         return json.dumps({"error": "No text provided for evaluation"}, indent=2)
@@ -77,7 +69,7 @@ async def evaluate_text_async(text: str, model_name: str = "gpt-4o-mini") -> str
         scoring_rubric = load_scoring_rubric()
 
         # Create the model
-        model = create_model(model_name)
+        model = infer_model(model_name)
 
         rprint(f"Starting evaluation for {len(scoring_rubric.metrics)} metrics...")
 

@@ -3,12 +3,12 @@ import re
 from pathlib import Path
 from typing import Any
 
-from leximetry.cli.metrics_model import MetricRubric, ScoringRubric
+from leximetry.model.metrics_model import MetricRubric, ScoringRubric
 
 
 def parse_scoring_rubric(markdown_content: str) -> ScoringRubric:
     """
-    Parse the scoring rubric section from the prose metrics markdown.
+    Quick hack to parse the scoring rubric section from the prose metrics markdown.
     """
 
     # Find the scoring rubric section - it goes until the next major section or end
@@ -24,7 +24,8 @@ def parse_scoring_rubric(markdown_content: str) -> ScoringRubric:
     metrics: list[MetricRubric] = []
 
     # Find all metric sections using a more robust pattern
-    metric_pattern = r"- \*\*Metric:\*\* (.+?)\n\n  - \*\*Description:\*\* (.+?)\n\n((?:  - \*\*Value \d:\*\* .+?\n\n)+)"
+    # Updated pattern to make the trailing newlines optional for the last value
+    metric_pattern = r"- \*\*Metric:\*\* (.+?)\n\n  - \*\*Description:\*\* (.+?)\n\n((?:  - \*\*Value \d+:\*\* .+?(?:\n\n|$))+)"
 
     for match in re.finditer(metric_pattern, rubric_content, re.DOTALL):
         name = match.group(1).strip()
@@ -33,30 +34,17 @@ def parse_scoring_rubric(markdown_content: str) -> ScoringRubric:
 
         # Parse the values
         values: dict[int, str] = {}
-        # Split the values section and look for Value patterns
-        value_lines = values_section.split("\n")
-        current_value = None
-        current_text = []
+        # Use a more flexible pattern that doesn't require trailing newlines
+        value_pattern = (
+            r"  - \*\*Value (\d+):\*\* (.+?)(?=\n  - \*\*Value \d+:\*\*|\n- \*\*Metric:\*\*|$)"
+        )
 
-        for line in value_lines:
-            value_match = re.match(r"  - \*\*Value (\d):\*\* (.+)", line)
-            if value_match:
-                # Save previous value if exists
-                if current_value is not None and current_text:
-                    value_desc = " ".join(" ".join(current_text).split())
-                    values[current_value] = value_desc
-
-                # Start new value
-                current_value = int(value_match.group(1))
-                current_text = [value_match.group(2)]
-            elif current_value is not None and line.strip():
-                # Continue current value text
-                current_text.append(line.strip())
-
-        # Don't forget the last value
-        if current_value is not None and current_text:
-            value_desc = " ".join(" ".join(current_text).split())
-            values[current_value] = value_desc
+        for value_match in re.finditer(value_pattern, values_section, re.DOTALL):
+            value_num = int(value_match.group(1))
+            value_text = value_match.group(2).strip()
+            # Remove extra whitespace and join multi-line descriptions
+            value_text = " ".join(value_text.split())
+            values[value_num] = value_text
 
         if values:  # Only add if we found values
             metric = MetricRubric(name=name, description=description, values=values)
@@ -126,6 +114,7 @@ def test_scoring_rubric_models():
         name="Clarity",
         description="Is the language readable and clear?",
         values={
+            0: "Cannot assess",
             1: "Contains numerous errors",
             2: "Contains errors but is clear",
             3: "Typical business email quality",
@@ -145,6 +134,7 @@ def test_scoring_rubric_models():
     # Verify they match
     assert rubric == reconstructed
     assert reconstructed.metrics[0].name == "Clarity"
+    assert reconstructed.metrics[0].values[0] == "Cannot assess"
     assert reconstructed.metrics[0].values[1] == "Contains numerous errors"
 
 
@@ -166,7 +156,7 @@ def test_extract_full_rubric():
     # Basic structure verification
     assert "metrics" in rubric_dict
     metrics = rubric_dict["metrics"]
-    assert len(metrics) >= 10, f"Expected at least 10 metrics, got {len(metrics)}"
+    assert len(metrics) == 12, f"Expected exactly 12 metrics, got {len(metrics)}"
 
     # Verify each metric has proper structure and data
     for metric in metrics:
@@ -174,19 +164,24 @@ def test_extract_full_rubric():
         assert "description" in metric and metric["description"]
         assert "values" in metric
         assert isinstance(metric["values"], dict)
-        assert len(metric["values"]) >= 4, f"Metric {metric['name']} needs at least 4 values"
 
-        # Values should be consecutive integers starting from 1
+        # Check that each metric has exactly 6 values (0-5)
         values = metric["values"]
-        for i in range(1, len(values) + 1):
-            assert i in values, f"Metric {metric['name']} missing value {i}"
-            assert values[i].strip(), f"Metric {metric['name']} value {i} is empty"
+        assert len(values) == 6, (
+            f"Metric {metric['name']} should have 6 values (0-5), but has {len(values)}"
+        )
+
+        # Values should be 0, 1, 2, 3, 4, 5
+        for i in range(6):
+            assert i in values
+            assert values[i].strip()
 
     # Test round-trip through Pydantic model
     rubric = ScoringRubric.model_validate(rubric_dict)
     assert len(rubric.metrics) == len(metrics)
 
-    print(f"✅ Successfully extracted {len(metrics)} metrics from actual docs")
+    print(f"✓ Successfully extracted {len(metrics)} metrics from actual docs")
+    print("✓ All metrics have exactly 6 value levels (0-5)")
 
 
 def test_save_rubric_to_json():
@@ -226,6 +221,12 @@ def test_save_rubric_to_json():
         assert "name" in first_metric
         assert "description" in first_metric
         assert "values" in first_metric
+
+        # Verify the first metric has 6 values with string keys "0" through "5"
+        values = first_metric["values"]
+        assert len(values) == 6
+        for i in range(6):
+            assert str(i) in values
 
         print(f"✓ Successfully saved rubric to {tmp_path}")
 

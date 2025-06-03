@@ -2,7 +2,8 @@
 
 ## Purpose
 
-This document describes a set of high-level metrics for assessing the quality of prose.
+This document describes a simple set of high-level metrics for assessing the quality of
+prose.
 
 ## Background
 
@@ -122,10 +123,8 @@ How are readers likely to engage with the material?
 11. **Longevity:** How likely would it be for a reader to find this interesting in a
     week, a month, a year, or a decade in the future?
 
-12. **Harmlessness:** Is the content likely to cause offense or risks to safety or
-    security of people? A **1** or **2** implies tangible physical risks.
-    A **3** is for highly inflammatory or biased content and **4** is for controversial
-    subjects.
+12. **Sensitivity:** To what degree is the content sensitive, potentially causing
+    offense or posing safety/security risks?
 
 ## FAQ
 
@@ -196,7 +195,32 @@ Guidelines:
 - If there simply isn't enough information to assess that metric, such as a very brief
   or seemingly missing text, assign it a **0**.
 
-Output the final number for that metric.
+For output, provide a result in the form "SCORE (REASON)":
+
+- The score as a single digit (0-5).
+
+- A brief parenthetical note with one or two sentences mentioning the reason for the
+  score.
+
+An example of output for Clarity might be:
+```
+5 (Well written. No language errors.)
+```
+
+An example of output for Factuality might be:
+```
+3 (Contains speculations about the authors cat as well as factual content on C++ programming.)
+```
+
+An example of output for Narrativity might be:
+```
+1 (Technical paper with clear structure.)
+```
+
+An example of the output for Sensitivity might be:
+```
+4 (Contains numerous obscenities.)
+```
 
 ### Scoring Rubric
 
@@ -205,8 +229,12 @@ Output the final number for that metric.
   - **Description:** Is the language readable and clear, with good command of language
     and correct spelling and grammar?
 
+  - **Value 0:** Cannot assess.
+    Content missing. Only use this if no content is present.
+
   - **Value 1:** Contains numerous spelling and punctuation errors and sentences with
     grammatical errors or that are hard to follow.
+    Use this for single-word or fragmentary content.
 
   - **Value 2:** Contains errors but is clear and understandable language.
 
@@ -227,6 +255,9 @@ Output the final number for that metric.
     the whole work? This metric reflects only the way something is written and does not
     include logical coherence or rigor, covered below.
 
+  - **Value 0:** Cannot assess.
+    Content missing or less than 3 sentences long.
+
   - **Value 1:** Incoherent with no clear topic or argument.
 
   - **Value 2:** Weak coherence or an incomplete draft.
@@ -243,6 +274,9 @@ Output the final number for that metric.
 
   - **Description:** To what degree do the writer or writers seem to mean what they say?
     This can't always be assessed, in which case the value is a 3.
+
+  - **Value 0:** Cannot assess.
+    Content missing or less than 1 sentence long.
 
   - **Value 1:** Trolling or clickbait where nothing said is actually meant.
 
@@ -262,8 +296,11 @@ Output the final number for that metric.
     mind? Note this does not relate to whether the facts are subjective.
     It applies to both fiction and non-fiction.
 
+  - **Value 0:** Cannot assess.
+    Content missing or less than 3 sentences long.
+
   - **Value 1:** Pure nonfiction organized by topic with clear scope and very little or
-    no personal stories or narrative.
+    no personal stories or narrative transitions between topics.
 
   - **Value 2:** Mostly informative or factual content without narrative, but some
     elements of narrative like a technical book with a few personal stories.
@@ -282,6 +319,9 @@ Output the final number for that metric.
   - **Description:** Are the statements or opinions inherently tied to individual
     experience or fictional people or concepts rather than facts?
 
+  - **Value 0:** Cannot assess.
+    Content missing or less than 1 sentence long.
+
   - **Value 1:** Everything stated is objectively true or false.
 
   - **Value 2:** Things stated are mostly objective but may include some personal
@@ -299,6 +339,9 @@ Output the final number for that metric.
   - **Description:** What is the emotional disposition of the writer to the reader, the
     material, or the people mentioned?
 
+  - **Value 0:** Cannot assess.
+    Content missing or less than 1 sentence long.
+
   - **Value 1:** Cold or negative toward reader or subject matter.
 
   - **Value 2:** Some neutral content but includes expressions of negativity or
@@ -314,6 +357,9 @@ Output the final number for that metric.
 - **Metric:** Factuality
 
   - **Description:** Are the statements included verifiably true?
+
+  - **Value 0:** Cannot assess.
+    Content missing or less than 1 sentence long.
 
   - **Value 1:** Pure fiction.
 
@@ -338,6 +384,9 @@ Output the final number for that metric.
   - **Description:** Is content logically organized, with terms and statements well
     defined, reasoning sound, and multiple perspectives or explanations considered?
 
+  - **Value 0:** Cannot assess.
+    Content missing or less than 3 sentences long.
+
   - **Value 1:** Sloppy reasoning and imprecise statements.
 
   - **Value 2:** Some logical gaps or unclear terms.
@@ -354,6 +403,9 @@ Output the final number for that metric.
 
   - **Description:** To what degree does the work include all relevant information that
     is within scope?
+
+  - **Value 0:** Cannot assess.
+    Content missing or less than 3 sentences long.
 
   - **Value 1:** Disjointed ideas or a very short text or post where there was no
     intention of covering more than a thought.
@@ -376,6 +428,9 @@ Output the final number for that metric.
   - **Description:** How accessible is the content to readers with varying levels of
     background knowledge and training?
 
+  - **Value 0:** Cannot assess.
+    Content missing or less than 1 sentence long.
+
   - **Value 1:** Requires graduate study or researcher-level knowledge to follow.
     Research papers are typically in this category.
 
@@ -396,35 +451,48 @@ Output the final number for that metric.
   - **Description:** How likely would it be for a reader to find this interesting in a
     week, a month, a year, or a decade in the future?
 
-  - **Value 1:** Today's news only interesting today.
+  - **Value 0:** Cannot assess.
+    Content missing or less than 1 sentence long.
 
-  - **Value 2:** Interesting for a few days to weeks.
+  - **Value 1:** Very recent news, most interesting with a day or two, like news or a
+    Twitter post about current news.
+
+  - **Value 2:** Interesting for a few days to weeks, like a family Facebook post.
 
   - **Value 3:** Interesting for months, like a New Yorker article.
 
   - **Value 4:** Interesting for years, like a typical book.
 
-  - **Value 5:** Will be equally of interest 50 years from now, like an encyclopedia
-    article or critically acclaimed book.
+  - **Value 5:** Likely will be of of interest in decades, like an encyclopedia article
+    or a critically acclaimed book.
 
-- **Metric:** Harmlessness
+- **Metric:** Sensitivity
 
-  - **Description:** Is the content likely to cause offense or risks to safety or
-    security of people?
+  - **Description:** To what degree is the content sensitive, potentially causing
+    offense or posing legal or safety/security risks?
 
-  - **Value 1:** Information that is directly a risk to people, such as instructions on
-    creating weapons or guides to suicide.
+  - **Value 0:** Cannot assess.
+    Content missing. Only use this for content that is missing.
 
-  - **Value 2:** Information that may directly lead to tangible and significant negative
-    impacts on people, such as incitement to violence, guides to criminal activity, or
-    deliberately deceptive content, such as about vaccines or elections.
+  - **Value 1:** Least sensitive: Content that is broadly innocuous, very unlikely to
+    cause offense or safety/security concerns.
+    Typical of most general fiction or non-fiction.
+    Also use 1 for fragmentary or unclear content.
 
-  - **Value 3:** Highly inflammatory discussions such as debates about wars or
-    conflicts, or statements that touch on subjects like race or gender that may be
-    considered biased or offensive by some readers.
+  - **Value 2:** Content expressing opinions that are likely to evoke strong emotions in
+    some, but is not inflammatory and poses no clear safety, security, legal risks, or
+    significant risks of offense.
 
-  - **Value 4:** Content with opinions that might evoke strong emotions but are not
-    inflammatory.
+  - **Value 3:** Content involving highly inflammatory discussions (e.g., on wars,
+    conflicts) or statements on sensitive topics (e.g., race, gender) that could be
+    considered biased or offensive by some readers, but does not directly incite harm.
+    Harsh or obscene language.
 
-  - **Value 5:** Pure facts without dangerous applications, unlikely to provoke
-    conflict.
+  - **Value 4:** Content that could lead to tangible negative impacts, guides to
+    criminal acts, or deliberately deceptive information (e.g., on vaccines, elections).
+    Also use this for content that would likely be called "hate speech" or explicit
+    sexual content suitable only for adults.
+
+  - **Value 5:** Most sensitive: Content containing information that poses a direct and
+    immediate risk to people's safety or security, such as instructions for creating
+    weapons, guides to suicide, or direct incitement to violence.

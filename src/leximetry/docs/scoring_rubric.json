@@ -4,7 +4,8 @@
       "name": "Clarity",
       "description": "Is the language readable and clear, with good command of language\n    and correct spelling and grammar?",
       "values": {
-        "1": "Contains numerous spelling and punctuation errors and sentences with grammatical errors or that are hard to follow.",
+        "0": "Cannot assess. Content missing. Only use this if no content is present.",
+        "1": "Contains numerous spelling and punctuation errors and sentences with grammatical errors or that are hard to follow. Use this for single-word or fragmentary content.",
         "2": "Contains errors but is clear and understandable language.",
         "3": "Typical business email quality with few errors in spelling, punctuation, or grammar and may contain a few typos, lack capitalization, etc.",
         "4": "Clear, correct language but with flaws in language use, such as trite phrases or gratuitous big words, or uses good language but is particularly lengthy or dense like some fiction.",
@@ -15,6 +16,7 @@
       "name": "Coherence",
       "description": "How well can the reader follow the progression of ideas and across\n    the whole work? This metric reflects only the way something is written and does not\n    include logical coherence or rigor, covered below.",
       "values": {
+        "0": "Cannot assess. Content missing or less than 3 sentences long.",
         "1": "Incoherent with no clear topic or argument.",
         "2": "Weak coherence or an incomplete draft.",
         "3": "Adequate and generally possible to follow.",
@@ -26,6 +28,7 @@
       "name": "Sincerity",
       "description": "To what degree do the writer or writers seem to mean what they say?\n    This can't always be assessed, in which case the value is a 3.",
       "values": {
+        "0": "Cannot assess. Content missing or less than 1 sentence long.",
         "1": "Trolling or clickbait where nothing said is actually meant.",
         "2": "Confusing content or statements where the intent is completely unclear or deliberately ambiguous.",
         "3": "Promotional or marketing content or content with unclear intent.",
@@ -37,7 +40,8 @@
       "name": "Narrativity",
       "description": "Is the material organized more by topic or with a narrative arc in\n    mind? Note this does not relate to whether the facts are subjective.\n    It applies to both fiction and non-fiction.",
       "values": {
-        "1": "Pure nonfiction organized by topic with clear scope and very little or no personal stories or narrative.",
+        "0": "Cannot assess. Content missing or less than 3 sentences long.",
+        "1": "Pure nonfiction organized by topic with clear scope and very little or no personal stories or narrative transitions between topics.",
         "2": "Mostly informative or factual content without narrative, but some elements of narrative like a technical book with a few personal stories.",
         "3": "Mix of narrative and facts, like a travel blog post or recipe blog that is both a practical guide and includes personal anecdote.",
         "4": "Narrative presentation but the purpose is not narrative, such as a best-selling non-fiction book filled with stories and anecdotes.",
@@ -48,6 +52,7 @@
       "name": "Subjectivity",
       "description": "Are the statements or opinions inherently tied to individual\n    experience or fictional people or concepts rather than facts?",
       "values": {
+        "0": "Cannot assess. Content missing or less than 1 sentence long.",
         "1": "Everything stated is objectively true or false.",
         "2": "Things stated are mostly objective but may include some personal opinions or interpretations.",
         "3": "A mix of events and a person's feelings about them.",
@@ -57,7 +62,7 @@
     },
     {
       "name": "Warmth",
-      "description": "What is the emotional disposition of the writer to the reader, the\n    material, or the people mentioned?",
+      "description": "What is the emotional disposition of the writer to the reader, the\n    material, or the people mentioned?\n\n    - **Value 0:** Cannot assess.\n      Content missing or less than 1 sentence long.",
       "values": {
         "1": "Cold or negative toward reader or subject matter.",
         "2": "Some neutral content but includes expressions of negativity or coldness.",
@@ -70,6 +75,7 @@
       "name": "Factuality",
       "description": "Are the statements included verifiably true?",
       "values": {
+        "0": "Cannot assess. Content missing or less than 1 sentence long.",
         "1": "Pure fiction.",
         "2": "Content where a reasonable person would have doubts, such as fringe theories or casual speculation by non-experts, or comments made without regard for truth like jokes or trolling that might be true or false, or content from sources known to be frequently inaccurate.",
         "3": "A mix of true statements and things where it is unclear if they are true or false, including assertions with no citation that cannot be confirmed or refuted by sources.",
@@ -81,6 +87,7 @@
       "name": "Rigor",
       "description": "Is content logically organized, with terms and statements well\n    defined, reasoning sound, and multiple perspectives or explanations considered?",
       "values": {
+        "0": "Cannot assess. Content missing or less than 3 sentences long.",
         "1": "Sloppy reasoning and imprecise statements.",
         "2": "Some logical gaps or unclear terms.",
         "3": "Generally logical but could be more precise.",
@@ -92,6 +99,7 @@
       "name": "Thoroughness",
       "description": "To what degree does the work include all relevant information that\n    is within scope?",
       "values": {
+        "0": "Cannot assess. Content missing or less than 3 sentences long.",
         "1": "Disjointed ideas or a very short text or post where there was no intention of covering more than a thought. Most single posts on Twitter are like this.",
         "2": "A short post that covers a clear set of ideas but makes no effort to be comprehensive. Many threads on Twitter are like this.",
         "3": "Carefully written and not short, but without thorough citations, such as a typical long blog post.",
@@ -103,6 +111,7 @@
       "name": "Accessibility",
       "description": "How accessible is the content to readers with varying levels of\n    background knowledge and training?",
       "values": {
+        "0": "Cannot assess. Content missing or less than 1 sentence long.",
         "1": "Requires graduate study or researcher-level knowledge to follow. Research papers are typically in this category.",
         "2": "Requires undergraduate or professional-level knowledge in the field and does not link to background materials or define all terminology.",
         "3": "Requires some background to understand. May define terms or link to background materials.",
@@ -114,21 +123,24 @@
       "name": "Longevity",
       "description": "How likely would it be for a reader to find this interesting in a\n    week, a month, a year, or a decade in the future?",
       "values": {
-        "1": "Today's news only interesting today.",
-        "2": "Interesting for a few days to weeks.",
+        "0": "Cannot assess. Content missing or less than 1 sentence long.",
+        "1": "Very recent news, most interesting with a day or two, like news or a Twitter post about current news.",
+        "2": "Interesting for a few days to weeks, like a family Facebook post.",
         "3": "Interesting for months, like a New Yorker article.",
         "4": "Interesting for years, like a typical book.",
-        "5": "Will be equally of interest 50 years from now, like an encyclopedia article or critically acclaimed book."
+        "5": "Likely will be of of interest in decades, like an encyclopedia article or a critically acclaimed book."
       }
     },
     {
-      "name": "Harmlessness",
-      "description": "Is the content likely to cause offense or risks to safety or\n    security of people?",
+      "name": "Sensitivity",
+      "description": "To what degree is the content sensitive, potentially causing\n    offense or posing legal or safety/security risks?",
       "values": {
-        "1": "Information that is directly a risk to people, such as instructions on creating weapons or guides to suicide.",
-        "2": "Information that may directly lead to tangible and significant negative impacts on people, such as incitement to violence, guides to criminal activity, or deliberately deceptive content, such as about vaccines or elections.",
-        "3": "Highly inflammatory discussions such as debates about wars or conflicts, or statements that touch on subjects like race or gender that may be considered biased or offensive by some readers.",
-        "4": "Content with opinions that might evoke strong emotions but are not inflammatory."
+        "0": "Cannot assess. Content missing. Only use this for content that is missing.",
+        "1": "Least sensitive: Content that is broadly innocuous, very unlikely to cause offense or safety/security concerns. Typical of most general fiction or non-fiction. Also use 1 for fragmentary or unclear content.",
+        "2": "Content expressing opinions that are likely to evoke strong emotions in some, but is not inflammatory and poses no clear safety, security, legal risks, or significant risks of offense.",
+        "3": "Content involving highly inflammatory discussions (e.g., on wars, conflicts) or statements on sensitive topics (e.g., race, gender) that could be considered biased or offensive by some readers, but does not directly incite harm. Harsh or obscene language.",
+        "4": "Content that could lead to tangible negative impacts, guides to criminal acts, or deliberately deceptive information (e.g., on vaccines, elections). Also use this for content that would likely be called \"hate speech\" or explicit sexual content suitable only for adults.",
+        "5": "Most sensitive: Content containing information that poses a direct and immediate risk to people's safety or security, such as instructions for creating weapons, guides to suicide, or direct incitement to violence."
       }
     }
   ]
