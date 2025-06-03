@@ -1,5 +1,4 @@
 import asyncio
-import json
 from textwrap import dedent
 
 from chopdiff.docs import TextDoc, TextUnit
@@ -7,7 +6,7 @@ from pydantic_ai import Agent
 from pydantic_ai.models import Model, infer_model
 from rich import print as rprint
 
-from leximetry.model.metrics_model import (
+from leximetry.eval.metrics_model import (
     Expression,
     Groundedness,
     Impact,
@@ -70,13 +69,13 @@ async def evaluate_single_metric(
     return metric_key, score
 
 
-async def evaluate_text_async(text: str, model_name: str = "gpt-4o-mini") -> str:
+async def evaluate_text_async(text: str, model_name: str = "gpt-4o-mini") -> ProseMetrics:
     """
     Evaluate text by calling the LLM once for each metric and assembling results.
     The `model_name` is a Pydantic model name like "gpt-4o-mini" or "claude-3-5-sonnet-latest".
     """
     if not text.strip():
-        return json.dumps({"error": "No text provided for evaluation"}, indent=2)
+        raise ValueError("No text provided for evaluation")
 
     rprint(f"Evaluating text with model: {model_name}")
     rprint(f"Text length: {len(text)} characters")
@@ -126,15 +125,15 @@ async def evaluate_text_async(text: str, model_name: str = "gpt-4o-mini") -> str
         )
 
         rprint("Evaluation completed successfully")
-        return prose_metrics.model_dump_json(indent=2)
+        return prose_metrics
 
     except Exception as e:
         error_msg = f"Error during evaluation: {str(e)}"
         rprint(f"[red]{error_msg}[/red]")
-        return json.dumps({"error": error_msg}, indent=2)
+        raise
 
 
-def evaluate_text(text: str, model: str = "gpt-4o-mini") -> str:
+def evaluate_text(text: str, model: str = "gpt-4o-mini") -> ProseMetrics:
     """
     Synchronous wrapper for evaluate_text.
     """

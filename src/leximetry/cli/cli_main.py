@@ -13,10 +13,12 @@ from typing import Literal
 
 from clideps.env_vars.dotenv_utils import load_dotenv_paths
 from clideps.utils.readable_argparse import ReadableColorFormatter, get_readable_console_width
-from rich import get_console
 from rich import print as rprint
+from rich.console import Console
 
-from leximetry.cli.evaluate_text import evaluate_text
+from leximetry.cli.rich_styles import LEXIMETRY_THEME
+from leximetry.cli.text_output import format_prose_metrics_rich
+from leximetry.eval.evaluate_text import evaluate_text
 
 APP_NAME = "leximetry"
 
@@ -53,6 +55,11 @@ def build_parser() -> argparse.ArgumentParser:
         default="gpt-4o",
         help="Model to use for evaluation. Examples: gpt-4o-mini, gpt-4o, claude-4-sonnet-latest, claude-3-haiku-latest, gemini-2.0-flash",
     )
+    parser.add_argument(
+        "--save",
+        type=str,
+        help="Save output to the specified file in JSON instead of printing to console",
+    )
     parser.add_argument("input", type=str, help="Path to the input text file")
 
     return parser
@@ -74,7 +81,8 @@ def main() -> None:
     """
     Main entry point for the CLI.
     """
-    get_console().width = get_readable_console_width()
+    # Create console with our theme
+    console = Console(theme=LEXIMETRY_THEME, width=get_readable_console_width())
 
     parser = build_parser()
     args = parser.parse_args()
@@ -85,7 +93,14 @@ def main() -> None:
 
         result = evaluate_text(text, args.model)
 
-        print(result)
+        if args.save:
+            # Save to JSON file
+            output_path = Path(args.save)
+            output_path.write_text(result.model_dump_json(indent=2))
+            rprint(f"[green]Results saved to {output_path}[/green]")
+        else:
+            # Print with rich formatting
+            console.print(format_prose_metrics_rich(result))
 
     except FileNotFoundError as e:
         rprint(f"[red]File not found: {e}[/red]")

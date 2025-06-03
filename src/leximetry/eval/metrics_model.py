@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import re
 from functools import cache
@@ -15,7 +17,7 @@ class Score(BaseModel):
     note: str = Field(default="")
 
     @classmethod
-    def parse(cls, text: str) -> "Score":
+    def parse(cls, text: str) -> Score:
         """
         Parse score from LLM output in format "SCORE (EXPLANATION)" or just "SCORE".
 

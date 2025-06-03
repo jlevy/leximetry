@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from leximetry.model.metrics_model import MetricRubric, ScoringRubric
+from leximetry.eval.metrics_model import MetricRubric, ScoringRubric
 
 
 def parse_scoring_rubric(markdown_content: str) -> ScoringRubric:

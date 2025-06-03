@@ -44,6 +44,7 @@ dependencies = [
     "flowmark>=0.4.6",
     "rich>=14.0.0",
     "chopdiff>=0.2.1",
+    "colour>=0.1.5",
 ]
 
 
