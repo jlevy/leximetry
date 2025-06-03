@@ -1,5 +1,3 @@
-__all__ = (  # noqa: F405
-    # TODO: Add all public symbols here.
-)
+from leximetry.cli.cli_main import main
 
-from .leximetry import *  # noqa: F403
+__all__ = ("main",)

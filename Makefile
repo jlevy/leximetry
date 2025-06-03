@@ -4,7 +4,7 @@
 
 .DEFAULT_GOAL := default
 
-.PHONY: default install lint test upgrade build clean
+.PHONY: default install lint test upgrade build clean generate_rubric
 
 default: install lint test
 
@@ -30,3 +30,7 @@ clean:
 	-rm -rf .mypy_cache/
 	-rm -rf .venv/
 	-find . -type d -name "__pycache__" -exec rm -rf {} +
+
+
+generate_rubric:
+	uv run python -m src.leximetry.docs.parse_rubric

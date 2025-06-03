@@ -1,4 +1,6 @@
 # Additions to standard GitHub .gitignore:
+.env
+.env.local
 *.bak
 *.orig
 tmp/
