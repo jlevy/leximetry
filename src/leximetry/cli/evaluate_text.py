@@ -2,10 +2,10 @@ import asyncio
 import json
 from textwrap import dedent
 
+from chopdiff.docs import TextDoc, TextUnit
 from pydantic_ai import Agent
 from pydantic_ai.models import Model, infer_model
 from rich import print as rprint
-from strif import abbrev_str
 
 from leximetry.model.metrics_model import (
     Expression,
@@ -13,14 +13,17 @@ from leximetry.model.metrics_model import (
     Impact,
     MetricRubric,
     ProseMetrics,
+    Score,
     Style,
     load_scoring_rubric,
 )
 
 
-async def evaluate_single_metric(text: str, metric: MetricRubric, model: Model) -> tuple[str, int]:
+async def evaluate_single_metric(
+    text: str, metric: MetricRubric, model: Model
+) -> tuple[str, Score]:
     """
-    Evaluate text for a single metric and return `(metric_name, score)`.
+    Evaluate text for a single metric and return `(metric_name, Score)`.
     """
     # Format the metric values for the prompt
     values_desc = "\n".join([f"{score}: {desc}" for score, desc in metric.values.items()])
@@ -36,21 +39,35 @@ async def evaluate_single_metric(text: str, metric: MetricRubric, model: Model) 
         TEXT TO EVALUATE:
         {text}
         
-        Return only the numeric score (1-{max(metric.values.keys())}) that best describes the text, using the scoring scale above.
-        If there isn't enough text to assess this metric, return 0.
+        Provide a result in the form "SCORE (REASON)":
+        - The score as a single digit (0-5) that best describes the text using the scoring scale above
+        - A brief parenthetical note with one or two sentences mentioning the reason for the score
+        
+        If there isn't enough text to assess this metric, return "0 (Insufficient content)".
+        
+        Examples:
+        - "5 (Well written. No language errors.)"
+        - "3 (Contains speculations about the author's cat as well as factual content.)"
+        - "1 (Technical paper with clear structure.)"
     """)
 
     # Create a simple agent for single metric evaluation
     single_metric_agent = Agent(
         model=model,
-        output_type=int,
+        output_type=str,
         instructions="You are evaluating metrics about a text excerpt. "
-        "Return only the numeric score that best matches the criteria.",
+        "Return your response in the exact format: SCORE (REASON) where SCORE is 0-5 and REASON is a brief explanation.",
     )
 
-    rprint(f"Evaluating {metric.name} with prompt: {abbrev_str(prompt)}")
     result = await single_metric_agent.run(prompt)
-    return metric.name.lower(), result.output
+
+    # Parse the LLM response into a Score object
+    score = Score.parse(result.output)
+
+    # Map metric name to lowercase for consistent lookup
+    metric_key = metric.name.lower()
+
+    return metric_key, score
 
 
 async def evaluate_text_async(text: str, model_name: str = "gpt-4o-mini") -> str:
@@ -87,24 +104,24 @@ async def evaluate_text_async(text: str, model_name: str = "gpt-4o-mini") -> str
         # Create ProseMetrics instance with the scores mapped to the correct structure
         prose_metrics = ProseMetrics(
             expression=Expression(
-                clarity=scores.get("clarity", 0),
-                coherence=scores.get("coherence", 0),
-                sincerity=scores.get("sincerity", 0),
+                clarity=scores.get("clarity", Score(value=0, note="Not evaluated")),
+                coherence=scores.get("coherence", Score(value=0, note="Not evaluated")),
+                sincerity=scores.get("sincerity", Score(value=0, note="Not evaluated")),
             ),
             style=Style(
-                narrativity=scores.get("narrativity", 0),
-                subjectivity=scores.get("subjectivity", 0),
-                warmth=scores.get("warmth", 0),
+                narrativity=scores.get("narrativity", Score(value=0, note="Not evaluated")),
+                subjectivity=scores.get("subjectivity", Score(value=0, note="Not evaluated")),
+                warmth=scores.get("warmth", Score(value=0, note="Not evaluated")),
             ),
             groundedness=Groundedness(
-                factuality=scores.get("factuality", 0),
-                rigor=scores.get("rigor", 0),
-                thoroughness=scores.get("thoroughness", 0),
+                factuality=scores.get("factuality", Score(value=0, note="Not evaluated")),
+                rigor=scores.get("rigor", Score(value=0, note="Not evaluated")),
+                thoroughness=scores.get("thoroughness", Score(value=0, note="Not evaluated")),
             ),
             impact=Impact(
-                accessibility=scores.get("accessibility", 0),
-                longevity=scores.get("longevity", 0),
-                harmlessness=scores.get("harmlessness", 0),
+                accessibility=scores.get("accessibility", Score(value=0, note="Not evaluated")),
+                longevity=scores.get("longevity", Score(value=0, note="Not evaluated")),
+                sensitivity=scores.get("sensitivity", Score(value=0, note="Not evaluated")),
             ),
         )
 
@@ -121,6 +138,14 @@ def evaluate_text(text: str, model: str = "gpt-4o-mini") -> str:
     """
     Synchronous wrapper for evaluate_text.
     """
+
+    doc = TextDoc.from_text(text)
+    print(f"Read doc: {doc.size_summary()}")
+    if doc.size(TextUnit.words) < 50:
+        raise ValueError("Text is < 50 words so too short to evaluate")
+    if doc.size(TextUnit.sentences) < 3:
+        raise ValueError("Text is < 3 sentences so too short to evaluate")
+
     return asyncio.run(evaluate_text_async(text, model))
 
 

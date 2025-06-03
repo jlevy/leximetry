@@ -1,32 +1,82 @@
 import json
+import re
 from functools import cache
 from pathlib import Path
 
 from pydantic import BaseModel, Field
 
 
+class Score(BaseModel):
+    """
+    A score with both numeric value and explanation.
+    """
+
+    value: int = Field(..., ge=0, le=5)
+    note: str = Field(default="")
+
+    @classmethod
+    def parse(cls, text: str) -> "Score":
+        """
+        Parse score from LLM output in format "SCORE (EXPLANATION)" or just "SCORE".
+
+        Examples:
+        - "5 (Well written. No language errors.)"
+        - "3 (Contains speculations about the authors cat as well as factual content on C++ programming.)"
+        - "1"
+        - "4 (Clear reasoning but some gaps)"
+        """
+        text = text.strip()
+
+        # Try to match "SCORE (EXPLANATION)" format
+        match = re.match(r"^(\d+)\s*\(([^)]*)\)\s*$", text)
+        if match:
+            value = int(match.group(1))
+            note = match.group(2).strip()
+            return cls(value=value, note=note)
+
+        # Try to match just a number
+        match = re.match(r"^(\d+)\s*$", text)
+        if match:
+            value = int(match.group(1))
+            return cls(value=value, note="")
+
+        # Try to extract first number if format is unclear
+        numbers = re.findall(r"\d+", text)
+        if numbers:
+            value = int(numbers[0])
+            # Try to extract text after the number as explanation
+            # Remove everything up to and including the first number and any following punctuation/spaces
+            remaining = re.sub(r"^.*?\d+\s*[:\-\(\)\s]*", "", text).strip()
+            return cls(value=value, note=remaining)
+
+        # Fallback: return 0 with the original text as note
+        return cls(value=0, note=text)
+
+
 class Expression(BaseModel):
-    clarity: int = Field(..., ge=0, le=5)
-    coherence: int = Field(..., ge=0, le=5)
-    sincerity: int = Field(..., ge=0, le=5)
+    clarity: Score = Field(default_factory=lambda: Score(value=0))
+    coherence: Score = Field(default_factory=lambda: Score(value=0))
+    sincerity: Score = Field(default_factory=lambda: Score(value=0))
 
 
 class Style(BaseModel):
-    narrativity: int = Field(..., ge=0, le=5)
-    subjectivity: int = Field(..., ge=0, le=5)
-    warmth: int = Field(..., ge=0, le=5)
+    narrativity: Score = Field(default_factory=lambda: Score(value=0))
+    subjectivity: Score = Field(default_factory=lambda: Score(value=0))
+    warmth: Score = Field(default_factory=lambda: Score(value=0))
 
 
 class Groundedness(BaseModel):
-    factuality: int = Field(..., ge=0, le=5)
-    rigor: int = Field(..., ge=0, le=5)
-    thoroughness: int = Field(..., ge=0, le=5)
+    factuality: Score = Field(default_factory=lambda: Score(value=0))
+    rigor: Score = Field(default_factory=lambda: Score(value=0))
+    thoroughness: Score = Field(default_factory=lambda: Score(value=0))
 
 
 class Impact(BaseModel):
-    accessibility: int = Field(..., ge=0, le=5)
-    longevity: int = Field(..., ge=0, le=5)
-    harmlessness: int = Field(..., ge=0, le=5)
+    accessibility: Score = Field(default_factory=lambda: Score(value=0))
+    longevity: Score = Field(default_factory=lambda: Score(value=0))
+    sensitivity: Score = Field(
+        default_factory=lambda: Score(value=0)
+    )  # Maps to "Sensitivity" in rubric
 
 
 class ProseMetrics(BaseModel):
@@ -47,7 +97,7 @@ class MetricRubric(BaseModel):
 
     name: str
     description: str
-    values: dict[int, str]  # value number (1-5) -> description
+    values: dict[int, str]  # value number (0-5) -> description
 
 
 class ScoringRubric(BaseModel):
@@ -72,32 +122,74 @@ def load_scoring_rubric() -> ScoringRubric:
 ## Tests
 
 
+def test_score_parsing():
+    """Test Score.parse method with various inputs."""
+    # Standard format
+    score1 = Score.parse("5 (Well written. No language errors.)")
+    assert score1.value == 5
+    assert score1.note == "Well written. No language errors."
+
+    # Just a number
+    score2 = Score.parse("3")
+    assert score2.value == 3
+    assert score2.note == ""
+
+    # Number with spaces
+    score3 = Score.parse("  4  ")
+    assert score3.value == 4
+    assert score3.note == ""
+
+    # Complex explanation
+    score4 = Score.parse("2 (Contains some factual content but also speculative elements)")
+    assert score4.value == 2
+    assert score4.note == "Contains some factual content but also speculative elements"
+
+    # Malformed but extractable
+    score5 = Score.parse("Score: 4 - generally well structured")
+    assert score5.value == 4
+    assert score5.note == "generally well structured"
+
+    # No number found
+    score6 = Score.parse("unclear input")
+    assert score6.value == 0
+    assert score6.note == "unclear input"
+
+
 def test_prose_metrics():
     """Test serialization and deserialization of ProseMetrics."""
     # Create test data
     original = ProseMetrics(
-        expression=Expression(clarity=4, coherence=3, sincerity=5),
-        style=Style(narrativity=2, subjectivity=3, warmth=4),
-        groundedness=Groundedness(factuality=3, rigor=4, thoroughness=2),
-        impact=Impact(accessibility=3, longevity=2, harmlessness=4),
+        expression=Expression(
+            clarity=Score(value=4, note="Clear writing"),
+            coherence=Score(value=3, note="Generally follows"),
+            sincerity=Score(value=5, note="Authentic tone"),
+        ),
+        style=Style(
+            narrativity=Score(value=2, note="Mostly factual"),
+            subjectivity=Score(value=3, note="Mix of objective and personal"),
+            warmth=Score(value=4, note="Positive tone"),
+        ),
+        groundedness=Groundedness(
+            factuality=Score(value=3, note="Some verifiable facts"),
+            rigor=Score(value=4, note="Well-structured reasoning"),
+            thoroughness=Score(value=2, note="Brief treatment"),
+        ),
+        impact=Impact(
+            accessibility=Score(value=3, note="Some background needed"),
+            longevity=Score(value=2, note="Relevant for weeks"),
+            sensitivity=Score(value=4, note="Some sensitive content"),
+        ),
     )
 
     # Test serialization
     json_str = original.model_dump_json()
-    expected_structure = {
-        "expression": {"clarity": 4, "coherence": 3, "sincerity": 5},
-        "style": {"narrativity": 2, "subjectivity": 3, "warmth": 4},
-        "groundedness": {"factuality": 3, "rigor": 4, "thoroughness": 2},
-        "impact": {"accessibility": 3, "longevity": 2, "harmlessness": 4},
-    }
 
     # Test deserialization
     reconstructed = ProseMetrics.model_validate_json(json_str)
 
     # Verify they match
     assert original == reconstructed
-    assert original.model_dump() == expected_structure
-    assert reconstructed.expression.clarity == 4
-    assert reconstructed.groundedness.factuality == 3
-    assert reconstructed.style.narrativity == 2
-    assert reconstructed.impact.accessibility == 3
+    assert reconstructed.expression.clarity.value == 4
+    assert reconstructed.expression.clarity.note == "Clear writing"
+    assert reconstructed.groundedness.factuality.value == 3
+    assert reconstructed.style.narrativity.note == "Mostly factual"
