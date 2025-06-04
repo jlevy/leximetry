@@ -2,7 +2,7 @@
   "metrics": [
     {
       "name": "Clarity",
-      "description": "Is the language readable and clear, with good command of language\n    and correct spelling and grammar?",
+      "description": "Is the language readable and clear, with good command of language and correct spelling and grammar?",
       "values": {
         "0": "Cannot assess. Content missing. Only use this if no content is present.",
         "1": "Contains numerous spelling and punctuation errors and sentences with grammatical errors or that are hard to follow. Use this for single-word or fragmentary content.",
@@ -14,7 +14,7 @@
     },
     {
       "name": "Coherence",
-      "description": "How well can the reader follow the progression of ideas and across\n    the whole work? This metric reflects only the way something is written and does not\n    include logical coherence or rigor, covered below.",
+      "description": "How well can the reader follow the progression of ideas and across the whole work? This metric reflects only the way something is written and does not include logical coherence or rigor, covered below.",
       "values": {
         "0": "Cannot assess. Content missing or less than 3 sentences long.",
         "1": "Incoherent with no clear topic or argument.",
@@ -26,7 +26,7 @@
     },
     {
       "name": "Sincerity",
-      "description": "To what degree do the writer or writers seem to mean what they say?\n    This can't always be assessed, in which case the value is a 3.",
+      "description": "To what degree do the writer or writers seem to mean what they say? This can't always be assessed, in which case the value is a 3.",
       "values": {
         "0": "Cannot assess. Content missing or less than 1 sentence long.",
         "1": "Trolling or clickbait where nothing said is actually meant.",
@@ -37,20 +37,8 @@
       }
     },
     {
-      "name": "Narrativity",
-      "description": "Is the material organized more by topic or with a narrative arc in\n    mind? Note this does not relate to whether the facts are subjective.\n    It applies to both fiction and non-fiction.",
-      "values": {
-        "0": "Cannot assess. Content missing or less than 3 sentences long.",
-        "1": "Pure nonfiction organized by topic with clear scope and very little or no personal stories or narrative transitions between topics.",
-        "2": "Mostly informative or factual content without narrative, but some elements of narrative like a technical book with a few personal stories.",
-        "3": "Mix of narrative and facts, like a travel blog post or recipe blog that is both a practical guide and includes personal anecdote.",
-        "4": "Narrative presentation but the purpose is not narrative, such as a best-selling non-fiction book filled with stories and anecdotes.",
-        "5": "Personal experience, autobiography, or fictional story where the purpose of the writing is narrative."
-      }
-    },
-    {
       "name": "Subjectivity",
-      "description": "Are the statements or opinions inherently tied to individual\n    experience or fictional people or concepts rather than facts?",
+      "description": "Are the statements or opinions inherently tied to individual experience or fictional people or concepts rather than facts?",
       "values": {
         "0": "Cannot assess. Content missing or less than 1 sentence long.",
         "1": "Everything stated is objectively true or false.",
@@ -61,9 +49,22 @@
       }
     },
     {
-      "name": "Warmth",
-      "description": "What is the emotional disposition of the writer to the reader, the\n    material, or the people mentioned?\n\n    - **Value 0:** Cannot assess.\n      Content missing or less than 1 sentence long.",
+      "name": "Narrativity",
+      "description": "Is the material organized more by topic or with a narrative arc in mind? Note this does not relate to whether the facts are subjective. It applies to both fiction and non-fiction.",
       "values": {
+        "0": "Cannot assess. Content missing or less than 3 sentences long.",
+        "1": "Pure nonfiction organized by topic with clear scope and very little or no personal stories or narrative transitions between topics.",
+        "2": "Mostly informative or factual content without narrative, but some elements of narrative like a technical book with a few personal stories.",
+        "3": "Mix of narrative and facts, like a travel blog post or recipe blog that is both a practical guide and includes personal anecdote.",
+        "4": "Narrative presentation but the purpose is not narrative, such as a best-selling non-fiction book filled with stories and anecdotes.",
+        "5": "Personal experience, autobiography, or fictional story where the purpose of the writing is narrative."
+      }
+    },
+    {
+      "name": "Warmth",
+      "description": "What is the emotional disposition of the writer to the reader, the material, or the people mentioned?",
+      "values": {
+        "0": "Cannot assess. Content missing or less than 1 sentence long.",
         "1": "Cold or negative toward reader or subject matter.",
         "2": "Some neutral content but includes expressions of negativity or coldness.",
         "3": "Completely neutral or an even mix of positive and negative emotions.",
@@ -84,20 +85,8 @@
       }
     },
     {
-      "name": "Rigor",
-      "description": "Is content logically organized, with terms and statements well\n    defined, reasoning sound, and multiple perspectives or explanations considered?",
-      "values": {
-        "0": "Cannot assess. Content missing or less than 3 sentences long.",
-        "1": "Sloppy reasoning and imprecise statements.",
-        "2": "Some logical gaps or unclear terms.",
-        "3": "Generally logical but could be more precise.",
-        "4": "Well-structured with mostly clear reasoning.",
-        "5": "Scientifically precise and logical; if objective, assertions have multiple citations from credible sources; if subjective, are thoroughly discussed from multiple perspectives."
-      }
-    },
-    {
       "name": "Thoroughness",
-      "description": "To what degree does the work include all relevant information that\n    is within scope?",
+      "description": "To what degree does the work include all relevant information that is within scope?",
       "values": {
         "0": "Cannot assess. Content missing or less than 3 sentences long.",
         "1": "Disjointed ideas or a very short text or post where there was no intention of covering more than a thought. Most single posts on Twitter are like this.",
@@ -108,8 +97,32 @@
       }
     },
     {
+      "name": "Rigor",
+      "description": "Is content logically organized, with terms and statements well defined, reasoning sound, and multiple perspectives or explanations considered?",
+      "values": {
+        "0": "Cannot assess. Content missing or less than 3 sentences long.",
+        "1": "Sloppy reasoning and imprecise statements.",
+        "2": "Some logical gaps or unclear terms.",
+        "3": "Generally logical but could be more precise.",
+        "4": "Well-structured with mostly clear reasoning.",
+        "5": "Scientifically precise and logical; if objective, assertions have multiple citations from credible sources; if subjective, are thoroughly discussed from multiple perspectives."
+      }
+    },
+    {
+      "name": "Sensitivity",
+      "description": "To what degree is the content sensitive, potentially causing offense or posing legal or safety/security risks? *Important:* Unlike with the other metrics, if *any* portion of a text is sensitive, pick the highest score that applies to the most sensitive portion. Don't \"average out\" the score, even if the sensitive content is included with non-sensitive content.",
+      "values": {
+        "0": "Cannot assess. Content missing. Only use this for content that is missing.",
+        "1": "Least sensitive: Content that is broadly innocuous, very unlikely to cause offense or safety/security concerns. Typical of most general fiction or non-fiction. Also use this score for fragmentary or unclear content.",
+        "2": "Content expressing opinions that are likely to evoke strong emotions in some, but is not inflammatory and poses no clear safety, security, legal risks, or significant risks of offense.",
+        "3": "Contains content that contains highly inflammatory discussions (e.g., on wars, conflicts) or statements on sensitive topics (e.g., race, gender) that could be considered biased or offensive by some readers, but does not directly incite harm. Harsh or obscene language.",
+        "4": "Contains content that could lead to tangible negative impacts, guides to criminal acts, or deliberately deceptive information (e.g., on vaccines, elections). Also use this for content that would likely be called \"hate speech\" or explicit sexual content suitable only for adults.",
+        "5": "Most sensitive: Contains content that poses a direct and immediate risk to people's safety or security. For example, this would include instructions for creating weapons, guides to suicide, or direct incitement to violence."
+      }
+    },
+    {
       "name": "Accessibility",
-      "description": "How accessible is the content to readers with varying levels of\n    background knowledge and training?",
+      "description": "How accessible is the content to readers with varying levels of background knowledge and training?",
       "values": {
         "0": "Cannot assess. Content missing or less than 1 sentence long.",
         "1": "Requires graduate study or researcher-level knowledge to follow. Research papers are typically in this category.",
@@ -121,26 +134,14 @@
     },
     {
       "name": "Longevity",
-      "description": "How likely would it be for a reader to find this interesting in a\n    week, a month, a year, or a decade in the future?",
+      "description": "How likely would it be for a reader to find this interesting in a week, a month, a year, or a decade in the future?",
       "values": {
         "0": "Cannot assess. Content missing or less than 1 sentence long.",
-        "1": "Very recent news, most interesting with a day or two, like news or a Twitter post about current news.",
+        "1": "Least longevity: Very recent news, most interesting with a day or two, like news or a Twitter post about current news.",
         "2": "Interesting for a few days to weeks, like a family Facebook post.",
         "3": "Interesting for months, like a New Yorker article.",
         "4": "Interesting for years, like a typical book.",
         "5": "Likely will be of of interest in decades, like an encyclopedia article or a critically acclaimed book."
-      }
-    },
-    {
-      "name": "Sensitivity",
-      "description": "To what degree is the content sensitive, potentially causing\n    offense or posing legal or safety/security risks?",
-      "values": {
-        "0": "Cannot assess. Content missing. Only use this for content that is missing.",
-        "1": "Least sensitive: Content that is broadly innocuous, very unlikely to cause offense or safety/security concerns. Typical of most general fiction or non-fiction. Also use 1 for fragmentary or unclear content.",
-        "2": "Content expressing opinions that are likely to evoke strong emotions in some, but is not inflammatory and poses no clear safety, security, legal risks, or significant risks of offense.",
-        "3": "Content involving highly inflammatory discussions (e.g., on wars, conflicts) or statements on sensitive topics (e.g., race, gender) that could be considered biased or offensive by some readers, but does not directly incite harm. Harsh or obscene language.",
-        "4": "Content that could lead to tangible negative impacts, guides to criminal acts, or deliberately deceptive information (e.g., on vaccines, elections). Also use this for content that would likely be called \"hate speech\" or explicit sexual content suitable only for adults.",
-        "5": "Most sensitive: Content containing information that poses a direct and immediate risk to people's safety or security, such as instructions for creating weapons, guides to suicide, or direct incitement to violence."
       }
     }
   ]

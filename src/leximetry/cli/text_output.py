@@ -18,9 +18,9 @@ METRICS_TITLE = "Leximetry"
 # Define the group order and their metrics
 GROUPS_CONFIG = {
     "expression": ["clarity", "coherence", "sincerity"],
-    "style": ["narrativity", "subjectivity", "warmth"],
-    "groundedness": ["factuality", "rigor", "thoroughness"],
-    "impact": ["accessibility", "longevity", "sensitivity"],
+    "style": ["subjectivity", "narrativity", "warmth"],
+    "groundedness": ["factuality", "thoroughness", "rigor"],
+    "impact": ["sensitivity", "accessibility", "longevity"],
 }
 
 
@@ -105,11 +105,11 @@ def format_notes_section(notes: list[tuple[str, str]]) -> RenderableType | None:
     # Define the horizontal pairs based on metric positions
     pairs = [
         ("Clarity", "Factuality"),
-        ("Coherence", "Rigor"),
-        ("Sincerity", "Thoroughness"),
+        ("Coherence", "Thoroughness"),
+        ("Sincerity", "Rigor"),
+        ("Subjectivity", "Sensitivity"),
         ("Narrativity", "Accessibility"),
-        ("Subjectivity", "Longevity"),
-        ("Warmth", "Sensitivity"),
+        ("Warmth", "Longevity"),
     ]
 
     # Available width for each column

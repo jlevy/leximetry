@@ -3,6 +3,8 @@ import re
 from pathlib import Path
 from typing import Any
 
+from strif import single_line
+
 from leximetry.eval.metrics_model import MetricRubric, ScoringRubric
 
 
@@ -25,25 +27,25 @@ def parse_scoring_rubric(markdown_content: str) -> ScoringRubric:
 
     # Find all metric sections using a more robust pattern
     # Updated pattern to make the trailing newlines optional for the last value
-    metric_pattern = r"- \*\*Metric:\*\* (.+?)\n\n  - \*\*Description:\*\* (.+?)\n\n((?:  - \*\*Value \d+:\*\* .+?(?:\n\n|$))+)"
+    metric_pattern = r"- \*\*Metric:\*\* (.+?)\n\n  - \*\*Description:\*\* (.+?)\n\n((?:  - \*\*Score \d+:\*\* .+?(?:\n\n|$))+)"
 
     for match in re.finditer(metric_pattern, rubric_content, re.DOTALL):
-        name = match.group(1).strip()
-        description = match.group(2).strip()
+        name = match.group(1).strip().strip("*")
+        description = single_line(match.group(2).strip())
         values_section = match.group(3)
 
         # Parse the values
         values: dict[int, str] = {}
         # Use a more flexible pattern that doesn't require trailing newlines
         value_pattern = (
-            r"  - \*\*Value (\d+):\*\* (.+?)(?=\n  - \*\*Value \d+:\*\*|\n- \*\*Metric:\*\*|$)"
+            r"  - \*\*Score (\d+):\*\* (.+?)(?=\n  - \*\*Score \d+:\*\*|\n- \*\*Metric:\*\*|$)"
         )
 
         for value_match in re.finditer(value_pattern, values_section, re.DOTALL):
             value_num = int(value_match.group(1))
             value_text = value_match.group(2).strip()
             # Remove extra whitespace and join multi-line descriptions
-            value_text = " ".join(value_text.split())
+            value_text = single_line(value_text)
             values[value_num] = value_text
 
         if values:  # Only add if we found values
@@ -57,7 +59,7 @@ def extract_rubric_to_json(
     prose_metrics_path: str | Path, output_path: str | Path | None = None
 ) -> dict[str, Any]:
     """
-    Extract scoring rubric from prose_metrics.md and save as JSON.
+    Extract scoring rubric from leximetry.md and save as JSON.
 
     Returns the parsed rubric as a dictionary.
     """
@@ -79,12 +81,12 @@ def extract_rubric_to_json(
 
 def main():
     """
-    Main function to generate the scoring rubric JSON from prose_metrics.md.
+    Main function to generate the scoring rubric JSON from leximetry.md.
     """
-    # Find the prose_metrics.md file
+    # Find the leximetry.md file
     current_file = Path(__file__)
     docs_dir = current_file.parent.parent / "docs"
-    prose_metrics_path = docs_dir / "prose_metrics.md"
+    prose_metrics_path = docs_dir / "leximetry.md"
     output_path = docs_dir / "scoring_rubric.json"
 
     # Extract and save the rubric
@@ -139,12 +141,12 @@ def test_scoring_rubric_models():
 
 
 def test_extract_full_rubric():
-    """Test extraction from the actual prose_metrics.md file."""
+    """Test extraction from the actual leximetry.md file."""
 
-    # Find the prose_metrics.md file
+    # Find the leximetry.md file
     current_file = Path(__file__)
     docs_dir = current_file.parent.parent / "docs"
-    prose_metrics_path = docs_dir / "prose_metrics.md"
+    prose_metrics_path = docs_dir / "leximetry.md"
 
     if not prose_metrics_path.exists():
         print(f"Skipping test - file not found: {prose_metrics_path}")
@@ -189,10 +191,10 @@ def test_save_rubric_to_json():
 
     import tempfile
 
-    # Find the prose_metrics.md file
+    # Find the leximetry.md file
     current_file = Path(__file__)
     docs_dir = current_file.parent.parent / "docs"
-    prose_metrics_path = docs_dir / "prose_metrics.md"
+    prose_metrics_path = docs_dir / "leximetry.md"
 
     if not prose_metrics_path.exists():
         print(f"Skipping test - file not found: {prose_metrics_path}")

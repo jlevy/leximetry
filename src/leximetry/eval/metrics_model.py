@@ -62,28 +62,28 @@ class Expression(BaseModel):
 
 
 class Style(BaseModel):
-    narrativity: Score = Field(default_factory=lambda: Score(value=0))
     subjectivity: Score = Field(default_factory=lambda: Score(value=0))
+    narrativity: Score = Field(default_factory=lambda: Score(value=0))
     warmth: Score = Field(default_factory=lambda: Score(value=0))
 
 
 class Groundedness(BaseModel):
     factuality: Score = Field(default_factory=lambda: Score(value=0))
-    rigor: Score = Field(default_factory=lambda: Score(value=0))
     thoroughness: Score = Field(default_factory=lambda: Score(value=0))
+    rigor: Score = Field(default_factory=lambda: Score(value=0))
 
 
 class Impact(BaseModel):
-    accessibility: Score = Field(default_factory=lambda: Score(value=0))
-    longevity: Score = Field(default_factory=lambda: Score(value=0))
     sensitivity: Score = Field(
         default_factory=lambda: Score(value=0)
     )  # Maps to "Sensitivity" in rubric
+    accessibility: Score = Field(default_factory=lambda: Score(value=0))
+    longevity: Score = Field(default_factory=lambda: Score(value=0))
 
 
 class ProseMetrics(BaseModel):
     """
-    Abstract metrics for prose. See `prose_metrics.md` for more details.
+    Abstract metrics for prose. See `leximetry.md` for more details.
     """
 
     expression: Expression
@@ -167,19 +167,19 @@ def test_prose_metrics():
             sincerity=Score(value=5, note="Authentic tone"),
         ),
         style=Style(
-            narrativity=Score(value=2, note="Mostly factual"),
             subjectivity=Score(value=3, note="Mix of objective and personal"),
+            narrativity=Score(value=2, note="Mostly factual"),
             warmth=Score(value=4, note="Positive tone"),
         ),
         groundedness=Groundedness(
             factuality=Score(value=3, note="Some verifiable facts"),
-            rigor=Score(value=4, note="Well-structured reasoning"),
             thoroughness=Score(value=2, note="Brief treatment"),
+            rigor=Score(value=4, note="Well-structured reasoning"),
         ),
         impact=Impact(
+            sensitivity=Score(value=4, note="Some sensitive content"),
             accessibility=Score(value=3, note="Some background needed"),
             longevity=Score(value=2, note="Relevant for weeks"),
-            sensitivity=Score(value=4, note="Some sensitive content"),
         ),
     )
 
