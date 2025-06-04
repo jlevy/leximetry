@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from textwrap import wrap
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from chopdiff.docs import TextDoc
 from rich.align import Align
@@ -11,13 +11,13 @@ from rich.console import Group, RenderableType
 from rich.panel import Panel
 from rich.text import Text
 
-from leximetry.cli.rich_styles import COLOR_SCHEME, GROUP_HEADERS
+from leximetry.cli.rich_styles import COLOR_SCHEME, GROUP_HEADERS, LEXIMETRY_THEME
 
 if TYPE_CHECKING:
     from leximetry.eval.metrics_model import ProseMetrics, Score
 
 METRICS_TITLE = "Leximetry"
-BOX_WIDTH = 64
+REPORT_WIDTH = 72
 
 # Diamond symbols for score visualization
 FILLED_DIAMOND = "◆"
@@ -26,10 +26,12 @@ EMPTY_DIAMOND = " "
 
 def get_group_metrics(prose_metrics: ProseMetrics) -> dict[str, list[str]]:
     """Get group names and their metrics from the model structure."""
-    groups = {}
-    for field_name in type(prose_metrics).model_fields:
+    groups: dict[str, list[str]] = {}
+    model_fields = cast(dict[str, Any], type(prose_metrics).model_fields)
+    for field_name in model_fields:
         group = getattr(prose_metrics, field_name)
-        metric_names = list(type(group).model_fields.keys())
+        group_model_fields = cast(dict[str, Any], type(group).model_fields)
+        metric_names = list(group_model_fields.keys())
         groups[field_name] = metric_names
     return groups
 
@@ -46,27 +48,6 @@ def format_score_viz(value: int, char: str = FILLED_DIAMOND, reversed: bool = Fa
         return empty + filled
     else:
         return filled + empty
-
-
-def format_group_rich(group_name: str, scores: dict[str, tuple[int, str]]) -> Text:
-    """
-    Format a group of scores without panel wrapping.
-    """
-    title, title_color = GROUP_HEADERS[group_name.lower()]
-
-    # Create group header
-    content = Text()
-    content.append(f"{title.upper()}", style=f"bold {title_color}")
-    content.append("\n")
-
-    # Add scores (without notes)
-    for i, (metric_name, (value, _note)) in enumerate(scores.items()):
-        if i > 0:
-            content.append("\n")
-        formatted_score = format_score_rich(metric_name, value)
-        content.append(formatted_score)
-
-    return content
 
 
 def collect_notes(prose_metrics: ProseMetrics) -> list[tuple[str, str]]:
@@ -114,7 +95,7 @@ def format_notes_section(notes: list[tuple[str, str]]) -> RenderableType | None:
 
     # Available width for each column
     # Account for panel padding (2) and some space between columns (4)
-    available_width = BOX_WIDTH - 6
+    available_width = REPORT_WIDTH - 6
     column_width = available_width // 2
 
     def format_single_note(
@@ -140,9 +121,9 @@ def format_notes_section(notes: list[tuple[str, str]]) -> RenderableType | None:
             if j > 0:
                 content.append("\n")
             if align_right:
-                content.append(f"{line:>{column_width}}", style="dim white")
+                content.append(f"{line:>{column_width}}", style="hint")
             else:
-                content.append(line, style="dim white")
+                content.append(line, style="hint")
 
         # Calculate total lines: 1 for name + 1 for newline + wrapped lines
         total_lines = 2 + len(wrapped_lines)
@@ -154,9 +135,9 @@ def format_notes_section(notes: list[tuple[str, str]]) -> RenderableType | None:
         title, _ = GROUP_HEADERS[group_name.lower()]
         content = Text()
         if align_right:
-            content.append(f"{title.upper():>{column_width}}", style="bold dim white")
+            content.append(f"{title.upper():>{column_width}}", style="category_name")
         else:
-            content.append(f"{title.upper()}", style="bold dim white")
+            content.append(f"{title.upper()}", style="category_name")
         return content, 1  # just header line
 
     # Build all content rows
@@ -226,10 +207,10 @@ def format_notes_section(notes: list[tuple[str, str]]) -> RenderableType | None:
     # Wrap in panel with invisible border
     notes_panel = Panel(
         panel_content,
-        title="[bold white]Scoring Notes[/bold white]",
+        title="[panel_title]Scoring Notes[/panel_title]",
         box=invisible_box,
-        padding=(0, 1),
-        width=BOX_WIDTH,
+        padding=(0, 0),
+        width=REPORT_WIDTH,
         expand=False,
     )
 
@@ -257,9 +238,9 @@ def format_prose_metrics_rich(prose_metrics: ProseMetrics) -> RenderableType:
     content = Text()
 
     # Top row with group labels
-    content.append(
-        "  EXPRESSION          ╭───────────╮         GROUNDEDNESS  ", style="bold dim white"
-    )
+    content.append("EXPRESSION", style="category_name")
+    content.append("            ╭───────────╮           ", style="white")
+    content.append("GROUNDEDNESS", style="category_name")
     content.append("\n")
 
     # Expression vs Groundedness rows
@@ -278,16 +259,18 @@ def format_prose_metrics_rich(prose_metrics: ProseMetrics) -> RenderableType:
 
         # Format the row: right-aligned metric_name score│diamonds│diamonds│score left-aligned metric_name
         content.append(f"{exp_metrics[i].title():>18}   {exp_score.value}", style=exp_color)
-        content.append("│", style="dim white")
+        content.append("│", style="white")
         content.append(f"{left_diamonds}", style=exp_color)
-        content.append("│", style="dim white")
+        content.append("│", style="white")
         content.append(f"{right_diamonds}", style=ground_color)
-        content.append("│", style="dim white")
+        content.append("│", style="white")
         content.append(f"{ground_score.value}  {ground_metrics[i].title():<17}", style=ground_color)
         content.append("\n")
 
     # Separator row
-    content.append("                      │─────┼─────│                       ", style="dim white")
+    content.append("STYLE", style="category_name")
+    content.append("                 │─────┼─────│                 ", style="white")
+    content.append("IMPACT", style="category_name")
     content.append("\n")
 
     # Style vs Impact rows
@@ -308,27 +291,25 @@ def format_prose_metrics_rich(prose_metrics: ProseMetrics) -> RenderableType:
 
         # Format the row: right-aligned metric_name score│diamonds│diamonds│score left-aligned metric_name
         content.append(f"{style_metrics[i].title():>18}   {style_score.value}", style=style_color)
-        content.append("│", style="dim white")
+        content.append("│", style="white")
         content.append(f"{left_diamonds}", style=style_color)
-        content.append("│", style="dim white")
+        content.append("│", style="white")
         content.append(f"{right_diamonds}", style=impact_color)
-        content.append("│", style="dim white")
+        content.append("│", style="white")
         content.append(f"{impact_score.value}  {impact_metrics[i].title():<17}", style=impact_color)
         if i < 2:  # Don't add newline after last row
             content.append("\n")
 
     # Bottom row with group labels
     content.append("\n")
-    content.append(
-        "  STYLE               ╰───────────╯               IMPACT  ", style="bold dim white"
-    )
+    content.append("                      ╰───────────╯                       ")
 
     main_panel = Panel(
-        content,
-        title=f"[bold white]{METRICS_TITLE}[/bold white]",
-        border_style="white",
-        padding=(0, 1),
-        width=BOX_WIDTH,
+        Align.center(content),
+        title=f"[panel_title]{METRICS_TITLE}[/panel_title]",
+        border_style="panel_title",
+        padding=(0, 2),
+        width=REPORT_WIDTH,
     )
 
     # Collect and format notes
@@ -402,25 +383,25 @@ def format_doc_stats(doc: TextDoc, text: str) -> RenderableType:
     words = doc.size(TextUnit.words)
     tokens = doc.size(TextUnit.tiktokens)
 
-    # Calculate responsive layout based on BOX_WIDTH
-    # Account for panel borders (2), padding (2), and column separator space
-    available_width = BOX_WIDTH - 6
+    # Calculate responsive layout based on REPORT_WIDTH
+    # Account for panel borders (2), padding (4), and column separator space
+    available_width = REPORT_WIDTH - 8
     left_column_width = available_width // 2
 
     # Left column: Bytes, Lines, Tokens (labels left-aligned, numbers right-aligned)
     left_content = Text()
     bytes_str = f"{bytes_count:,}"
-    left_content.append("Bytes: ", style="dim white")
+    left_content.append("Bytes: ", style="hint")
     left_content.append(bytes_str.rjust(left_column_width - 7), style="bold white")
     left_content.append("\n")
 
     lines_str = f"{lines:,}"
-    left_content.append("Lines: ", style="dim white")
+    left_content.append("Lines: ", style="hint")
     left_content.append(lines_str.rjust(left_column_width - 7), style="bold white")
     left_content.append("\n")
 
     tokens_str = f"{tokens:,}"
-    left_content.append("Tokens: ", style="dim white")
+    left_content.append("Tokens: ", style="hint")
     left_content.append(tokens_str.rjust(left_column_width - 8), style="bold white")
 
     # Right column: Paras, Sentences, Words (also right-aligned)
@@ -428,31 +409,30 @@ def format_doc_stats(doc: TextDoc, text: str) -> RenderableType:
     right_content = Text()
 
     paras_str = f"{paras:,}"
-    right_content.append("Paras: ", style="dim white")
+    right_content.append("Paras: ", style="hint")
     right_content.append(paras_str.rjust(right_column_width - 7), style="bold white")
     right_content.append("\n")
 
     sents_str = f"{sents:,}"
-    right_content.append("Sentences: ", style="dim white")
+    right_content.append("Sentences: ", style="hint")
     right_content.append(sents_str.rjust(right_column_width - 11), style="bold white")
     right_content.append("\n")
 
     words_str = f"{words:,}"
-    right_content.append("Words: ", style="dim white")
+    right_content.append("Words: ", style="hint")
     right_content.append(words_str.rjust(right_column_width - 7), style="bold white")
 
-    # Create two-column layout with responsive padding
-    column_padding = max(1, (BOX_WIDTH - 50) // 10)  # More padding for wider boxes
+    # Create two-column layout with equal columns and minimal padding
     columns_display = Columns(
-        [left_content, right_content], equal=False, expand=False, padding=(0, column_padding)
+        [left_content, right_content], equal=True, expand=True, padding=(0, 1)
     )
 
     doc_panel = Panel(
         columns_display,
-        title="[bold white]Size Summary[/bold white]",
-        border_style="white",
-        padding=(0, 1),
-        width=BOX_WIDTH,
+        title="[panel_title]Size Summary[/panel_title]",
+        border_style="panel_title",
+        padding=(0, 2),
+        width=REPORT_WIDTH,
     )
 
     return doc_panel
@@ -527,5 +507,5 @@ def test_compact_format():
     test_text = "This is a sample text for testing the document statistics and formatting. " * 1000
     test_doc = TextDoc.from_text(test_text)
 
-    console = Console()
+    console = Console(theme=LEXIMETRY_THEME)
     console.print(format_complete_analysis(test_metrics, test_doc, test_text))

@@ -61,6 +61,10 @@ LEXIMETRY_THEME = Theme(
         "metric_name": "dim",
         "header": "bold dim white",
         "separator": "dim white",
+        # Category/group name headers
+        "category_name": f"bold {hsl_to_hex('hsl(170, 15%, 68%)')}",
+        "hint": f"{hsl_to_hex('hsl(180, 0%, 70%)')}",
+        "panel_title": f"bold {hsl_to_hex('hsl(0, 0%, 90%)')}",
     }
 )
 
@@ -82,8 +86,8 @@ COLOR_SCHEME = {
 
 # Group headers with their display names and colors
 GROUP_HEADERS: dict[str, tuple[str, str]] = {
-    "expression": ("Expression", "white"),
-    "style": ("Style", "white"),
-    "groundedness": ("Groundedness", "white"),
-    "impact": ("Impact", "white"),
+    "expression": ("Expression", "category_name"),
+    "style": ("Style", "category_name"),
+    "groundedness": ("Groundedness", "category_name"),
+    "impact": ("Impact", "category_name"),
 }

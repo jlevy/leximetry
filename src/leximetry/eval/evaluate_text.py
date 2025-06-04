@@ -1,7 +1,9 @@
 import asyncio
+import time
 from textwrap import dedent
 
 from chopdiff.docs import TextDoc, TextUnit
+from funlog import format_duration
 from pydantic_ai import Agent
 from pydantic_ai.models import Model, infer_model
 from rich import print as rprint
@@ -24,6 +26,7 @@ async def evaluate_single_metric(
     """
     Evaluate text for a single metric and return `(metric_name, Score)`.
     """
+    start_time = time.time()
     # Format the metric values for the prompt
     values_desc = "\n".join([f"{score}: {desc}" for score, desc in metric.values.items()])
 
@@ -66,6 +69,8 @@ async def evaluate_single_metric(
     # Map metric name to lowercase for consistent lookup
     metric_key = metric.name.lower()
 
+    elapsed = time.time() - start_time
+    print(f"Evaluated {metric_key} in {format_duration(elapsed)}")
     return metric_key, score
 
 
@@ -126,6 +131,7 @@ async def evaluate_text_async(text: str, model_name: str = "gpt-4o-mini") -> Pro
 
         rprint("Evaluation complete!")
         rprint()
+
         return prose_metrics
 
     except Exception as e:
