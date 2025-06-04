@@ -42,21 +42,21 @@ def hsl_to_hex(hsl_string: str) -> str:
 LEXIMETRY_THEME = Theme(
     {
         # Expression group - Yellow/green tones
-        "clarity": f"bold {hsl_to_hex('hsl(75, 71%, 71%)')}",
-        "coherence": f"bold {hsl_to_hex('hsl(55, 80%, 63%)')}",
-        "sincerity": f"bold {hsl_to_hex('hsl(25, 80%, 65%)')}",
+        "clarity": f"bold {hsl_to_hex('hsl(80, 71%, 70%)')}",
+        "coherence": f"bold {hsl_to_hex('hsl(55, 80%, 70%)')}",
+        "sincerity": f"bold {hsl_to_hex('hsl(25, 80%, 70%)')}",
         # Style group - Purple/pink tones
-        "narrativity": f"bold {hsl_to_hex('hsl(270, 63%, 73%)')}",
-        "subjectivity": f"bold {hsl_to_hex('hsl(290, 54%, 65%)')}",
-        "warmth": f"bold {hsl_to_hex('hsl(320, 70%, 65%)')}",
+        "subjectivity": f"bold {hsl_to_hex('hsl(260, 54%, 73%)')}",
+        "narrativity": f"bold {hsl_to_hex('hsl(295, 63%, 73%)')}",
+        "warmth": f"bold {hsl_to_hex('hsl(340, 60%, 73%)')}",
         # Groundedness group - Blue tones
-        "factuality": f"bold {hsl_to_hex('hsl(229, 66%, 65%)')}",
-        "rigor": f"bold {hsl_to_hex('hsl(248, 75%, 68%)')}",
-        "thoroughness": f"bold {hsl_to_hex('hsl(218, 57%, 80%)')}",
+        "factuality": f"bold {hsl_to_hex('hsl(230, 53%, 70%)')}",
+        "thoroughness": f"bold {hsl_to_hex('hsl(200, 50%, 70%)')}",
+        "rigor": f"bold {hsl_to_hex(hsl_string='hsl(185, 38%, 50%)')}",
         # Impact group - Mixed colors
-        "accessibility": f"bold {hsl_to_hex('hsl(188, 44%, 62%)')}",
-        "longevity": f"bold {hsl_to_hex('hsl(117, 23%, 59%)')}",
-        "sensitivity": f"bold {hsl_to_hex('hsl(0, 69%, 63%)')}",
+        "sensitivity": f"bold {hsl_to_hex('hsl(0, 39%, 60%)')}",
+        "accessibility": f"bold {hsl_to_hex('hsl(60, 34%, 70%)')}",
+        "longevity": f"bold {hsl_to_hex('hsl(90, 33%, 50%)')}",
         # Utility styles
         "metric_name": "dim",
         "header": "bold dim white",
@@ -69,15 +69,15 @@ COLOR_SCHEME = {
     "clarity": "clarity",
     "coherence": "coherence",
     "sincerity": "sincerity",
-    "narrativity": "narrativity",
     "subjectivity": "subjectivity",
+    "narrativity": "narrativity",
     "warmth": "warmth",
     "factuality": "factuality",
-    "rigor": "rigor",
     "thoroughness": "thoroughness",
+    "rigor": "rigor",
+    "sensitivity": "sensitivity",
     "accessibility": "accessibility",
     "longevity": "longevity",
-    "sensitivity": "sensitivity",
 }
 
 # Group headers with their display names and colors
