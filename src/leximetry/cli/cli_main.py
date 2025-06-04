@@ -11,13 +11,14 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Literal
 
+from chopdiff.docs import TextDoc, TextUnit
 from clideps.env_vars.dotenv_utils import load_dotenv_paths
 from clideps.utils.readable_argparse import ReadableColorFormatter, get_readable_console_width
 from rich import print as rprint
 from rich.console import Console
 
 from leximetry.cli.rich_styles import LEXIMETRY_THEME
-from leximetry.cli.text_output import format_prose_metrics_rich
+from leximetry.cli.text_output import format_complete_analysis
 from leximetry.eval.evaluate_text import evaluate_text
 
 APP_NAME = "leximetry"
@@ -91,6 +92,15 @@ def main() -> None:
         load_dotenv_paths()
         text = Path(args.input).read_text()
 
+        # Calculate document statistics
+        doc = TextDoc.from_text(text)
+        bytes_count = len(text.encode("utf-8"))
+        lines = doc.size(TextUnit.lines)
+        paras = doc.size(TextUnit.paragraphs)
+        sents = doc.size(TextUnit.sentences)
+        words = doc.size(TextUnit.words)
+        tokens = doc.size(TextUnit.tiktokens)
+
         result = evaluate_text(text, args.model)
 
         if args.save:
@@ -99,8 +109,18 @@ def main() -> None:
             output_path.write_text(result.model_dump_json(indent=2))
             rprint(f"[green]Results saved to {output_path}[/green]")
         else:
-            # Print with rich formatting
-            console.print(format_prose_metrics_rich(result))
+            # Print with rich formatting including document stats
+            console.print(
+                format_complete_analysis(
+                    result,
+                    bytes_count=bytes_count,
+                    lines=lines,
+                    paras=paras,
+                    sents=sents,
+                    words=words,
+                    tokens=tokens,
+                )
+            )
 
     except FileNotFoundError as e:
         rprint(f"[red]File not found: {e}[/red]")

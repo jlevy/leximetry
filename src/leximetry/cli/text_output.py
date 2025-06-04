@@ -3,6 +3,7 @@ from __future__ import annotations
 from textwrap import wrap
 from typing import TYPE_CHECKING
 
+from rich.align import Align
 from rich.columns import Columns
 from rich.console import Group, RenderableType
 from rich.panel import Panel
@@ -14,6 +15,7 @@ if TYPE_CHECKING:
     from leximetry.eval.metrics_model import ProseMetrics, Score
 
 METRICS_TITLE = "Leximetry"
+BOX_WIDTH = 60
 
 # Define the group order and their metrics
 GROUPS_CONFIG = {
@@ -123,7 +125,7 @@ def format_notes_section(notes: list[tuple[str, str]]) -> RenderableType | None:
         metric_style = COLOR_SCHEME.get(metric_name.lower(), "white")
 
         # Add metric name using the theme style
-        content.append(f"{metric_name}:", style=metric_style)
+        content.append(f"{metric_name}", style=metric_style)
         content.append("\n")
 
         # Wrap the note text
@@ -280,12 +282,15 @@ def format_prose_metrics_rich(prose_metrics: ProseMetrics) -> RenderableType:
     # Combine sections with the separator
     panel_content = Group(top_section, separator, bottom_section)
 
+    # Center the content in the panel
+    centered_content = Align.center(panel_content)
+
     main_panel = Panel(
-        panel_content,
+        centered_content,
         title=f"[bold white]{METRICS_TITLE}[/bold white]",
         border_style="white",
         padding=(0, 1),
-        width=50,
+        width=BOX_WIDTH,
     )
 
     # Collect and format notes
@@ -351,37 +356,57 @@ def format_doc_stats(
     """
     from rich.columns import Columns
 
-    # Left column: Bytes, Lines, Tokens
+    # Calculate responsive layout based on BOX_WIDTH
+    # Account for panel borders (2), padding (2), and column separator space
+    available_width = BOX_WIDTH - 6
+    left_column_width = available_width // 2
+
+    # Left column: Bytes, Lines, Tokens (labels left-aligned, numbers right-aligned)
     left_content = Text()
+    bytes_str = f"{bytes_count:,}"
     left_content.append("Bytes: ", style="dim white")
-    left_content.append(f"{bytes_count:,}", style="bold white")
+    left_content.append(bytes_str.rjust(left_column_width - 7), style="bold white")
     left_content.append("\n")
+
+    lines_str = f"{lines:,}"
     left_content.append("Lines: ", style="dim white")
-    left_content.append(f"{lines:,}", style="bold white")
+    left_content.append(lines_str.rjust(left_column_width - 7), style="bold white")
     left_content.append("\n")
+
+    tokens_str = f"{tokens:,}"
     left_content.append("Tokens: ", style="dim white")
-    left_content.append(f"{tokens:,}", style="bold white")
+    left_content.append(tokens_str.rjust(left_column_width - 8), style="bold white")
 
-    # Right column: Paras, Sentences, Words
+    # Right column: Paras, Sentences, Words (also right-aligned)
+    right_column_width = available_width - left_column_width
     right_content = Text()
-    right_content.append("Paras: ", style="dim white")
-    right_content.append(f"{paras:,}", style="bold white")
-    right_content.append("\n")
-    right_content.append("Sentences: ", style="dim white")
-    right_content.append(f"{sents:,}", style="bold white")
-    right_content.append("\n")
-    right_content.append("Words: ", style="dim white")
-    right_content.append(f"{words:,}", style="bold white")
 
-    # Create two-column layout
-    columns_display = Columns([left_content, right_content], equal=True, expand=False)
+    paras_str = f"{paras:,}"
+    right_content.append("Paras: ", style="dim white")
+    right_content.append(paras_str.rjust(right_column_width - 7), style="bold white")
+    right_content.append("\n")
+
+    sents_str = f"{sents:,}"
+    right_content.append("Sentences: ", style="dim white")
+    right_content.append(sents_str.rjust(right_column_width - 11), style="bold white")
+    right_content.append("\n")
+
+    words_str = f"{words:,}"
+    right_content.append("Words: ", style="dim white")
+    right_content.append(words_str.rjust(right_column_width - 7), style="bold white")
+
+    # Create two-column layout with responsive padding
+    column_padding = max(1, (BOX_WIDTH - 50) // 10)  # More padding for wider boxes
+    columns_display = Columns(
+        [left_content, right_content], equal=False, expand=False, padding=(0, column_padding)
+    )
 
     doc_panel = Panel(
         columns_display,
-        title="[bold white]Document Summary[/bold white]",
+        title="[bold white]Size Summary[/bold white]",
         border_style="white",
         padding=(0, 1),
-        width=55,
+        width=BOX_WIDTH,
     )
 
     return doc_panel

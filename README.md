@@ -215,54 +215,45 @@ The rough criteria are:
   expect *mostly* consistent results at the precision of a 1-to-5 score.
   This makes the measurement repeatable and inexpensive.
 
+- **Fixed:** Doesn't change over time.
+  A score assigned today to be the same in a year on the same document.
+
 - **Discriminative:** The attribute helps decide the nature of a piece of writing in a
   useful way.
-
-- **Fixed:** Doesn't change over time.
-  We want to minimize the chances of some
 
 None of these are perfectly achievable goals for a measurement.
 For example, a work that is factual today might become non-factual in a year, depending
 on external events. But they are generally still good goals.
 
-There are several possible attributes of text that I deliberately did try to capture in
-these metrics:
+This does lead to excluding some attributes:
 
-- Dimensions that are inherently difficult to assess.
-  For example, "creativity" or "originality" are certainly attributes of writing, but it
-  human assessments are highly variable and it's almost impossible to say whether the
-  creativity comes from the writer or is simply being copied (especially by an LLM).
+- "Appropriateness" relates to a specific audience so is not descriptive.
 
-- Dimensions that reflect how a work relates to a specific audience, like
-  appropriateness for a given audience.
+- "Creativity" or "originality" are not measurable.
+  It's almost impossible to say whether the creativity comes from the writer or is
+  simply being copied (especially by an LLM).
 
-- Dimensions that change over time, like "notability."
+- "Notability" is not fixed.
+  A post that is notable today is not notable in a year.
 
-- Dimensions that tend to be assessed quite differently by different people, like
-  "offensiveness," "controversiality," or "bias."
-  Having them within the middle of the "harmlessness" metric seems like a reasonable
-  compromise that will tend to produce consistent assessments.
-  It's worth marking offensive content but clearly distinguishing it from things that
-  may lead to physical harm.
-  We may not agree on how offensive something is, but we can agree how likely some
-  people will find it offensive.
-
-- Dimensions that would largely be used to filter content and better handled by
-  dedicated classifiers, like fraudulent content or spam.
+- "Offensiveness" and "bias" are hard to measure since opinions can be so variable.
+  Instead we use "sensitivity" to capture presence of potentially offensive content.
+  Opinions on what is offensive differ, but we often can agree that a significant number
+  of people will find specific content offensive.
 
 There are a few other attributes I've considered and might make sense to add to the
-list, if they add enough value:
+list:
 
 - *Facetiousness* could be helpful.
-  *Humor* is probably more confusing as a name for this dimension, since it implies
-  perceptions of the reader.
+  *Humor* may seem like a good attribute but it's a confusing name for this dimension,
+  since it implies perceptions of the reader.
   ("Maybe that's a joke but it's not funny!") Also, although one might think
   facetiousness is the opposite of sincerity, it's actually a distinct dimension.
   For example, something can be facetious and sincere (like a humorous compliment) or
   facetious and insincere (like a trolling comment).
 
-- *Practical utility* could possibly distinguish artistry or entertainment from
-  practical information.
+- *Utility* could possibly distinguish artistry or entertainment from practical, useful
+  information.
 
 ## Scoring Instructions
 
@@ -610,7 +601,6 @@ An example of the output for Sensitivity might be:
 
   - **Score 5:** Likely will be of of interest in decades, like an encyclopedia article
     or a critically acclaimed book.
-
 
 <!-- END INCLUDE: leximetry.md -->
 
