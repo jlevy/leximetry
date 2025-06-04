@@ -21,40 +21,17 @@ BOX_WIDTH = 64
 
 # Diamond symbols for score visualization
 FILLED_DIAMOND = "◆"
-EMPTY_DIAMOND = "◇"
-
-# Define the group order and their metrics
-GROUPS_CONFIG = {
-    "expression": ["clarity", "coherence", "sincerity"],
-    "style": ["subjectivity", "narrativity", "warmth"],
-    "groundedness": ["factuality", "thoroughness", "rigor"],
-    "impact": ["sensitivity", "accessibility", "longevity"],
-}
+EMPTY_DIAMOND = " "
 
 
-def render_diamonds(
-    filled_count: int,
-    empty_count: int,
-    text: Text,
-    filled_style: str,
-    empty_style: str = "dim white",
-    reversed: bool = False,
-) -> None:
-    """
-    Helper function to render diamond symbols with appropriate styling.
-    If reversed=True, renders empty diamonds first, then filled diamonds.
-    If reversed=False, renders filled diamonds first, then empty diamonds.
-    """
-    if reversed:
-        if empty_count > 0:
-            text.append(EMPTY_DIAMOND * empty_count, style=empty_style)
-        if filled_count > 0:
-            text.append(FILLED_DIAMOND * filled_count, style=filled_style)
-    else:
-        if filled_count > 0:
-            text.append(FILLED_DIAMOND * filled_count, style=filled_style)
-        if empty_count > 0:
-            text.append(EMPTY_DIAMOND * empty_count, style=empty_style)
+def get_group_metrics(prose_metrics: ProseMetrics) -> dict[str, list[str]]:
+    """Get group names and their metrics from the model structure."""
+    groups = {}
+    for field_name in type(prose_metrics).model_fields:
+        group = getattr(prose_metrics, field_name)
+        metric_names = list(type(group).model_fields.keys())
+        groups[field_name] = metric_names
+    return groups
 
 
 def format_score_viz(value: int, char: str = FILLED_DIAMOND, reversed: bool = False) -> str:
@@ -69,23 +46,6 @@ def format_score_viz(value: int, char: str = FILLED_DIAMOND, reversed: bool = Fa
         return empty + filled
     else:
         return filled + empty
-
-
-def format_score_rich(metric_name: str, value: int) -> Text:
-    """
-    Format a single score with rich formatting.
-    """
-    color = COLOR_SCHEME.get(metric_name.lower(), "white")
-    diamonds = format_score_viz(value)
-
-    text = Text()
-    # Calculate padding to align diamonds vertically
-    # Longest is "Subjectivity: 5 " = 16 chars
-    metric_with_number = f"{metric_name.title()}: {value} "
-    text.append(f"{metric_with_number:<16}", style="bold")
-    text.append(diamonds, style=f"bold {color}")
-
-    return text
 
 
 def format_group_rich(group_name: str, scores: dict[str, tuple[int, str]]) -> Text:
@@ -115,7 +75,8 @@ def collect_notes(prose_metrics: ProseMetrics) -> list[tuple[str, str]]:
     """
     notes: list[tuple[str, str]] = []
 
-    for group_name, metric_names in GROUPS_CONFIG.items():
+    groups = get_group_metrics(prose_metrics)
+    for group_name, metric_names in groups.items():
         group = getattr(prose_metrics, group_name)
         for metric_name in metric_names:
             score = getattr(group, metric_name)
@@ -135,7 +96,7 @@ def format_notes_section(notes: list[tuple[str, str]]) -> RenderableType | None:
     # Create a dict for easy lookup
     notes_dict = {metric_name: note for metric_name, note in notes}
 
-    # Define the horizontal pairs based on metric positions, with group headings
+    # Define the horizontal pairs based on model structure
     grid_rows = [
         # Group headers for first section
         ("__EXPRESSION_HEADER", "__GROUNDEDNESS_HEADER"),
@@ -156,15 +117,20 @@ def format_notes_section(notes: list[tuple[str, str]]) -> RenderableType | None:
     available_width = BOX_WIDTH - 6
     column_width = available_width // 2
 
-    def format_single_note(metric_name: str, note: str) -> tuple[Text, int]:
+    def format_single_note(
+        metric_name: str, note: str, align_right: bool = False
+    ) -> tuple[Text, int]:
         """Format a single note and return content plus line count"""
         content = Text()
 
         # Get the style name for this metric from the theme
         metric_style = COLOR_SCHEME.get(metric_name.lower(), "white")
 
-        # Add metric name using the theme style
-        content.append(f"{metric_name}", style=metric_style)
+        # Add metric name using the theme style with alignment
+        if align_right:
+            content.append(f"{metric_name:>{column_width}}", style=metric_style)
+        else:
+            content.append(f"{metric_name}", style=metric_style)
         content.append("\n")
 
         # Wrap the note text
@@ -173,18 +139,24 @@ def format_notes_section(notes: list[tuple[str, str]]) -> RenderableType | None:
         for j, line in enumerate(wrapped_lines):
             if j > 0:
                 content.append("\n")
-            content.append(line, style="dim white")
+            if align_right:
+                content.append(f"{line:>{column_width}}", style="dim white")
+            else:
+                content.append(line, style="dim white")
 
         # Calculate total lines: 1 for name + 1 for newline + wrapped lines
         total_lines = 2 + len(wrapped_lines)
 
         return content, total_lines
 
-    def format_group_header(group_name: str) -> tuple[Text, int]:
+    def format_group_header(group_name: str, align_right: bool = False) -> tuple[Text, int]:
         """Format a group header and return content plus line count"""
         title, _ = GROUP_HEADERS[group_name.lower()]
         content = Text()
-        content.append(f"{title.upper()}", style="bold dim white")
+        if align_right:
+            content.append(f"{title.upper():>{column_width}}", style="bold dim white")
+        else:
+            content.append(f"{title.upper()}", style="bold dim white")
         return content, 1  # just header line
 
     # Build all content rows
@@ -199,15 +171,21 @@ def format_notes_section(notes: list[tuple[str, str]]) -> RenderableType | None:
         # Handle group headers
         if left_item.startswith("__") and left_item.endswith("_HEADER"):
             group_name = left_item.replace("__", "").replace("_HEADER", "")
-            left_content, left_height = format_group_header(group_name)
+            # EXPRESSION and STYLE should be left-aligned in the left column
+            left_content, left_height = format_group_header(group_name, align_right=False)
         elif left_item in notes_dict:
-            left_content, left_height = format_single_note(left_item, notes_dict[left_item])
+            left_content, left_height = format_single_note(
+                left_item, notes_dict[left_item], align_right=True
+            )
 
         if right_item.startswith("__") and right_item.endswith("_HEADER"):
             group_name = right_item.replace("__", "").replace("_HEADER", "")
-            right_content, right_height = format_group_header(group_name)
+            # GROUNDEDNESS and IMPACT should be right-aligned in the right column
+            right_content, right_height = format_group_header(group_name, align_right=True)
         elif right_item in notes_dict:
-            right_content, right_height = format_single_note(right_item, notes_dict[right_item])
+            right_content, right_height = format_single_note(
+                right_item, notes_dict[right_item], align_right=False
+            )
 
         # Only include rows where at least one side has content
         if left_height > 0 or right_height > 0:
@@ -248,7 +226,7 @@ def format_notes_section(notes: list[tuple[str, str]]) -> RenderableType | None:
     # Wrap in panel with invisible border
     notes_panel = Panel(
         panel_content,
-        title="[bold white]Notes[/bold white]",
+        title="[bold white]Scoring Notes[/bold white]",
         box=invisible_box,
         padding=(0, 1),
         width=BOX_WIDTH,
@@ -260,92 +238,93 @@ def format_notes_section(notes: list[tuple[str, str]]) -> RenderableType | None:
 
 def format_prose_metrics_rich(prose_metrics: ProseMetrics) -> RenderableType:
     """
-    Format ProseMetrics object with rich formatting in mirrored two-column layout.
+    Format ProseMetrics object with rich formatting matching the sample layout.
     """
 
-    # Helper function to create a mirrored row layout
-    def create_mirrored_section(
-        left_group: str, right_group: str, include_headers: bool = True
-    ) -> Text:
-        left_title, _left_color = GROUP_HEADERS[left_group.lower()]
-        right_title, _right_color = GROUP_HEADERS[right_group.lower()]
-        left_metrics = GROUPS_CONFIG[left_group]
-        right_metrics = GROUPS_CONFIG[right_group]
-        left_data = getattr(prose_metrics, left_group)
-        right_data = getattr(prose_metrics, right_group)
+    # Get all the data dynamically
+    expression = prose_metrics.expression
+    style = prose_metrics.style
+    groundedness = prose_metrics.groundedness
+    impact = prose_metrics.impact
 
-        content = Text()
+    # Get metric names from model structure
+    exp_metrics = list(type(expression).model_fields.keys())
+    style_metrics = list(type(style).model_fields.keys())
+    ground_metrics = list(type(groundedness).model_fields.keys())
+    impact_metrics = list(type(impact).model_fields.keys())
 
-        # Section headers aligned with labels (only if requested)
-        if include_headers:
-            content.append(f"{left_title.upper():>12}", style="bold dim white")
-            content.append("                   ", style="dim white")
-            content.append(f"{right_title.upper()}", style="bold dim white")
+    # Create the layout with proper spacing and labels
+    content = Text()
+
+    # Top row with group labels
+    content.append(
+        "  EXPRESSION          ╭───────────╮         GROUNDEDNESS  ", style="bold dim white"
+    )
+    content.append("\n")
+
+    # Expression vs Groundedness rows
+    for i in range(3):
+        exp_score = getattr(expression, exp_metrics[i])
+        ground_score = getattr(groundedness, ground_metrics[i])
+
+        exp_color = COLOR_SCHEME.get(exp_metrics[i], "white")
+        ground_color = COLOR_SCHEME.get(ground_metrics[i], "white")
+
+        # Create diamond displays (right-aligned for left, left-aligned for right)
+        left_diamonds = (EMPTY_DIAMOND * (5 - exp_score.value)) + (FILLED_DIAMOND * exp_score.value)
+        right_diamonds = (FILLED_DIAMOND * ground_score.value) + (
+            EMPTY_DIAMOND * (5 - ground_score.value)
+        )
+
+        # Format the row: right-aligned metric_name score│diamonds│diamonds│score left-aligned metric_name
+        content.append(f"{exp_metrics[i].title():>18}   {exp_score.value}", style=exp_color)
+        content.append("│", style="dim white")
+        content.append(f"{left_diamonds}", style=exp_color)
+        content.append("│", style="dim white")
+        content.append(f"{right_diamonds}", style=ground_color)
+        content.append("│", style="dim white")
+        content.append(f"{ground_score.value}  {ground_metrics[i].title():<17}", style=ground_color)
+        content.append("\n")
+
+    # Separator row
+    content.append("                      │─────┼─────│                       ", style="dim white")
+    content.append("\n")
+
+    # Style vs Impact rows
+    for i in range(3):
+        style_score = getattr(style, style_metrics[i])
+        impact_score = getattr(impact, impact_metrics[i])
+
+        style_color = COLOR_SCHEME.get(style_metrics[i], "white")
+        impact_color = COLOR_SCHEME.get(impact_metrics[i], "white")
+
+        # Create diamond displays (right-aligned for left, left-aligned for right)
+        left_diamonds = (EMPTY_DIAMOND * (5 - style_score.value)) + (
+            FILLED_DIAMOND * style_score.value
+        )
+        right_diamonds = (FILLED_DIAMOND * impact_score.value) + (
+            EMPTY_DIAMOND * (5 - impact_score.value)
+        )
+
+        # Format the row: right-aligned metric_name score│diamonds│diamonds│score left-aligned metric_name
+        content.append(f"{style_metrics[i].title():>18}   {style_score.value}", style=style_color)
+        content.append("│", style="dim white")
+        content.append(f"{left_diamonds}", style=style_color)
+        content.append("│", style="dim white")
+        content.append(f"{right_diamonds}", style=impact_color)
+        content.append("│", style="dim white")
+        content.append(f"{impact_score.value}  {impact_metrics[i].title():<17}", style=impact_color)
+        if i < 2:  # Don't add newline after last row
             content.append("\n")
 
-        # Data rows
-        for i in range(3):  # Each group has 3 metrics
-            left_metric = left_metrics[i]
-            right_metric = right_metrics[i]
-            left_score = getattr(left_data, left_metric)
-            right_score = getattr(right_data, right_metric)
-
-            left_style = COLOR_SCHEME.get(left_metric.lower(), "white")
-            right_style = COLOR_SCHEME.get(right_metric.lower(), "white")
-
-            # Create styled diamond displays
-            left_empty_count = 5 - left_score.value
-            left_filled_count = left_score.value
-            right_filled_count = right_score.value
-            right_empty_count = 5 - right_score.value
-
-            # Left side: right-aligned name in 12 chars, then diamonds and number
-            left_name = left_metric.title()
-
-            content.append(f"{left_name:>12}", style=left_style)
-            content.append(" ", style="white")
-            # Left side: empty diamonds first, then filled (reversed)
-            render_diamonds(left_filled_count, left_empty_count, content, left_style, reversed=True)
-            content.append(f" {left_score.value}", style=left_style)
-            content.append(" │ ", style="dim white")
-
-            # Right side: number, diamonds, left-aligned name
-            right_name = right_metric.title()
-
-            content.append(f"{right_score.value} ", style=right_style)
-            # Right side: filled diamonds first, then empty (normal)
-            render_diamonds(
-                right_filled_count, right_empty_count, content, right_style, reversed=False
-            )
-            content.append(f" {right_name}", style=right_style)
-
-            # Only add newline if not the last row
-            if i < 2:
-                content.append("\n")
-
-        return content
-
-    # Create the two mirrored sections
-    top_section = create_mirrored_section("expression", "groundedness", include_headers=True)
-
-    # Add horizontal separator
-    separator = Text()
-    separator.append("       STYLE", style="bold dim white")
-    separator.append(" ────────", style="dim white")
-    separator.append("┼", style="dim white")
-    separator.append("──────── ", style="dim white")
-    separator.append("IMPACT        ", style="bold dim white")
-
-    bottom_section = create_mirrored_section("style", "impact", include_headers=False)
-
-    # Combine sections with the separator
-    panel_content = Group(top_section, separator, bottom_section)
-
-    # Center the content in the panel
-    centered_content = Align.center(panel_content)
+    # Bottom row with group labels
+    content.append("\n")
+    content.append(
+        "  STYLE               ╰───────────╯               IMPACT  ", style="bold dim white"
+    )
 
     main_panel = Panel(
-        centered_content,
+        content,
         title=f"[bold white]{METRICS_TITLE}[/bold white]",
         border_style="white",
         padding=(0, 1),
@@ -372,7 +351,8 @@ def format_prose_metrics_plain(prose_metrics: ProseMetrics) -> str:
     lines.append("=" * 50)
     lines.append("")
 
-    for group_name, metric_names in GROUPS_CONFIG.items():
+    groups = get_group_metrics(prose_metrics)
+    for group_name, metric_names in groups.items():
         # Group header
         title, _ = GROUP_HEADERS[group_name]
         lines.append(title.upper())

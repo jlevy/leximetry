@@ -54,9 +54,9 @@ LEXIMETRY_THEME = Theme(
         "thoroughness": f"bold {hsl_to_hex('hsl(200, 50%, 70%)')}",
         "rigor": f"bold {hsl_to_hex(hsl_string='hsl(185, 38%, 50%)')}",
         # Impact group - Mixed colors
-        "sensitivity": f"bold {hsl_to_hex('hsl(0, 39%, 60%)')}",
+        "sensitivity": f"bold {hsl_to_hex('hsl(0, 36%, 62%)')}",
         "accessibility": f"bold {hsl_to_hex('hsl(60, 34%, 70%)')}",
-        "longevity": f"bold {hsl_to_hex('hsl(90, 33%, 50%)')}",
+        "longevity": f"bold {hsl_to_hex('hsl(89, 25%, 57%)')}",
         # Utility styles
         "metric_name": "dim",
         "header": "bold dim white",
