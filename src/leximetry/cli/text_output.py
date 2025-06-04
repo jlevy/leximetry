@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from chopdiff.docs import TextDoc
 from rich.align import Align
+from rich.box import Box
 from rich.columns import Columns
 from rich.console import Group, RenderableType
 from rich.panel import Panel
@@ -16,7 +17,7 @@ if TYPE_CHECKING:
     from leximetry.eval.metrics_model import ProseMetrics, Score
 
 METRICS_TITLE = "Leximetry"
-BOX_WIDTH = 60
+BOX_WIDTH = 64
 
 # Diamond symbols for score visualization
 FILLED_DIAMOND = "◆"
@@ -126,7 +127,7 @@ def collect_notes(prose_metrics: ProseMetrics) -> list[tuple[str, str]]:
 
 def format_notes_section(notes: list[tuple[str, str]]) -> RenderableType | None:
     """
-    Format the notes section in horizontally paired columns with balanced heights.
+    Format the notes section in horizontally paired columns with balanced heights and group headings.
     """
     if not notes:
         return None
@@ -134,18 +135,26 @@ def format_notes_section(notes: list[tuple[str, str]]) -> RenderableType | None:
     # Create a dict for easy lookup
     notes_dict = {metric_name: note for metric_name, note in notes}
 
-    # Define the horizontal pairs based on metric positions
-    pairs = [
+    # Define the horizontal pairs based on metric positions, with group headings
+    grid_rows = [
+        # Group headers for first section
+        ("__EXPRESSION_HEADER", "__GROUNDEDNESS_HEADER"),
+        # Expression vs Groundedness metrics
         ("Clarity", "Factuality"),
         ("Coherence", "Thoroughness"),
         ("Sincerity", "Rigor"),
+        # Group headers for second section
+        ("__STYLE_HEADER", "__IMPACT_HEADER"),
+        # Style vs Impact metrics
         ("Subjectivity", "Sensitivity"),
         ("Narrativity", "Accessibility"),
         ("Warmth", "Longevity"),
     ]
 
     # Available width for each column
-    column_width = 30
+    # Account for panel padding (2) and some space between columns (4)
+    available_width = BOX_WIDTH - 6
+    column_width = available_width // 2
 
     def format_single_note(metric_name: str, note: str) -> tuple[Text, int]:
         """Format a single note and return content plus line count"""
@@ -171,25 +180,37 @@ def format_notes_section(notes: list[tuple[str, str]]) -> RenderableType | None:
 
         return content, total_lines
 
-    # Build all content
+    def format_group_header(group_name: str) -> tuple[Text, int]:
+        """Format a group header and return content plus line count"""
+        title, _ = GROUP_HEADERS[group_name.lower()]
+        content = Text()
+        content.append(f"{title.upper()}", style="bold dim white")
+        return content, 1  # just header line
+
+    # Build all content rows
     all_content: list[tuple[Text, Text]] = []
 
-    for left_metric, right_metric in pairs:
-        left_note = notes_dict.get(left_metric, "")
-        right_note = notes_dict.get(right_metric, "")
+    for left_item, right_item in grid_rows:
+        left_content = Text()
+        right_content = Text()
+        left_height = 0
+        right_height = 0
 
-        # Only include pairs where at least one has a note
-        if left_note or right_note:
-            if left_note:
-                left_content, left_height = format_single_note(left_metric, left_note)
-            else:
-                left_content, left_height = Text(), 0
+        # Handle group headers
+        if left_item.startswith("__") and left_item.endswith("_HEADER"):
+            group_name = left_item.replace("__", "").replace("_HEADER", "")
+            left_content, left_height = format_group_header(group_name)
+        elif left_item in notes_dict:
+            left_content, left_height = format_single_note(left_item, notes_dict[left_item])
 
-            if right_note:
-                right_content, right_height = format_single_note(right_metric, right_note)
-            else:
-                right_content, right_height = Text(), 0
+        if right_item.startswith("__") and right_item.endswith("_HEADER"):
+            group_name = right_item.replace("__", "").replace("_HEADER", "")
+            right_content, right_height = format_group_header(group_name)
+        elif right_item in notes_dict:
+            right_content, right_height = format_single_note(right_item, notes_dict[right_item])
 
+        # Only include rows where at least one side has content
+        if left_height > 0 or right_height > 0:
             # Balance the pair by padding the shorter one
             height_diff = abs(left_height - right_height)
             if left_height < right_height:
@@ -215,14 +236,26 @@ def format_notes_section(notes: list[tuple[str, str]]) -> RenderableType | None:
         final_left.append(left_content)
         final_right.append(right_content)
 
-    # Create header and columns
-    header = Text()
-    header.append("NOTES", style="bold dim white")
-    header.append("\n")
+    # Create columns
+    columns_display = Columns([final_left, final_right], equal=True, expand=True)
 
-    columns_display = Columns([final_left, final_right], equal=True, expand=False)
+    # Add extra spacing at top
+    panel_content = Group("", columns_display)
 
-    return Group(header, columns_display)
+    # Create a custom box with invisible borders
+    invisible_box = Box("    \n    \n    \n    \n    \n    \n    \n    \n")
+
+    # Wrap in panel with invisible border
+    notes_panel = Panel(
+        panel_content,
+        title="[bold white]Notes[/bold white]",
+        box=invisible_box,
+        padding=(0, 1),
+        width=BOX_WIDTH,
+        expand=False,
+    )
+
+    return notes_panel
 
 
 def format_prose_metrics_rich(prose_metrics: ProseMetrics) -> RenderableType:
@@ -378,8 +411,8 @@ def format_doc_stats(doc: TextDoc, text: str) -> RenderableType:
     """
     Format document statistics in two columns using TextDoc object.
     """
-    from rich.columns import Columns
     from chopdiff.docs import TextUnit
+    from rich.columns import Columns
 
     # Calculate document statistics from doc object
     bytes_count = len(text.encode("utf-8"))
@@ -468,8 +501,8 @@ def format_complete_analysis(
 
 def test_compact_format():
     """Test the complete analysis format with document stats and metrics."""
-    from rich.console import Console
     from chopdiff.docs import TextDoc
+    from rich.console import Console
 
     from leximetry.eval.metrics_model import (
         Expression,

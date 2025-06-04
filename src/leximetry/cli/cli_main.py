@@ -11,7 +11,7 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Literal
 
-from chopdiff.docs import TextDoc, TextUnit
+from chopdiff.docs import TextDoc
 from clideps.env_vars.dotenv_utils import load_dotenv_paths
 from clideps.utils.readable_argparse import ReadableColorFormatter, get_readable_console_width
 from rich import print as rprint

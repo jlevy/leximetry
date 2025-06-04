@@ -124,7 +124,8 @@ async def evaluate_text_async(text: str, model_name: str = "gpt-4o-mini") -> Pro
             ),
         )
 
-        rprint("Evaluation completed successfully")
+        rprint("Evaluation complete!")
+        rprint()
         return prose_metrics
 
     except Exception as e:
@@ -135,11 +136,10 @@ async def evaluate_text_async(text: str, model_name: str = "gpt-4o-mini") -> Pro
 
 def evaluate_text(text: str, model: str = "gpt-4o-mini") -> ProseMetrics:
     """
-    Synchronous wrapper for evaluate_text.
+    Synchronous wrapper for evaluate_text_async.
     """
 
     doc = TextDoc.from_text(text)
-    print(f"Read doc: {doc.size_summary()}")
     if doc.size(TextUnit.words) < 50:
         raise ValueError("Text is < 50 words so too short to evaluate")
     if doc.size(TextUnit.sentences) < 3:
