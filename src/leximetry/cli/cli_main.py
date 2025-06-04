@@ -94,12 +94,6 @@ def main() -> None:
 
         # Calculate document statistics
         doc = TextDoc.from_text(text)
-        bytes_count = len(text.encode("utf-8"))
-        lines = doc.size(TextUnit.lines)
-        paras = doc.size(TextUnit.paragraphs)
-        sents = doc.size(TextUnit.sentences)
-        words = doc.size(TextUnit.words)
-        tokens = doc.size(TextUnit.tiktokens)
 
         result = evaluate_text(text, args.model)
 
@@ -110,17 +104,7 @@ def main() -> None:
             rprint(f"[green]Results saved to {output_path}[/green]")
         else:
             # Print with rich formatting including document stats
-            console.print(
-                format_complete_analysis(
-                    result,
-                    bytes_count=bytes_count,
-                    lines=lines,
-                    paras=paras,
-                    sents=sents,
-                    words=words,
-                    tokens=tokens,
-                )
-            )
+            console.print(format_complete_analysis(result, doc, text))
 
     except FileNotFoundError as e:
         rprint(f"[red]File not found: {e}[/red]")

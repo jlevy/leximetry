@@ -3,6 +3,7 @@ from __future__ import annotations
 from textwrap import wrap
 from typing import TYPE_CHECKING
 
+from chopdiff.docs import TextDoc
 from rich.align import Align
 from rich.columns import Columns
 from rich.console import Group, RenderableType
@@ -17,6 +18,10 @@ if TYPE_CHECKING:
 METRICS_TITLE = "Leximetry"
 BOX_WIDTH = 60
 
+# Diamond symbols for score visualization
+FILLED_DIAMOND = "◆"
+EMPTY_DIAMOND = "◇"
+
 # Define the group order and their metrics
 GROUPS_CONFIG = {
     "expression": ["clarity", "coherence", "sincerity"],
@@ -26,13 +31,38 @@ GROUPS_CONFIG = {
 }
 
 
-def format_score_viz(value: int, char: str = "◆", reversed: bool = False) -> str:
+def render_diamonds(
+    filled_count: int,
+    empty_count: int,
+    text: Text,
+    filled_style: str,
+    empty_style: str = "dim white",
+    reversed: bool = False,
+) -> None:
+    """
+    Helper function to render diamond symbols with appropriate styling.
+    If reversed=True, renders empty diamonds first, then filled diamonds.
+    If reversed=False, renders filled diamonds first, then empty diamonds.
+    """
+    if reversed:
+        if empty_count > 0:
+            text.append(EMPTY_DIAMOND * empty_count, style=empty_style)
+        if filled_count > 0:
+            text.append(FILLED_DIAMOND * filled_count, style=filled_style)
+    else:
+        if filled_count > 0:
+            text.append(FILLED_DIAMOND * filled_count, style=filled_style)
+        if empty_count > 0:
+            text.append(EMPTY_DIAMOND * empty_count, style=empty_style)
+
+
+def format_score_viz(value: int, char: str = FILLED_DIAMOND, reversed: bool = False) -> str:
     """
     Format score as a bar showing filled and empty positions out of 5.
     Returns filled diamonds followed by empty diamonds, or reversed if requested.
     """
     filled = char * value
-    empty = "◇" * (5 - value)
+    empty = EMPTY_DIAMOND * (5 - value)
 
     if reversed:
         return empty + filled
@@ -242,10 +272,7 @@ def format_prose_metrics_rich(prose_metrics: ProseMetrics) -> RenderableType:
             content.append(f"{left_name:>12}", style=left_style)
             content.append(" ", style="white")
             # Left side: empty diamonds first, then filled (reversed)
-            if left_empty_count > 0:
-                content.append("◇" * left_empty_count, style="dim white")
-            if left_filled_count > 0:
-                content.append("◆" * left_filled_count, style=left_style)
+            render_diamonds(left_filled_count, left_empty_count, content, left_style, reversed=True)
             content.append(f" {left_score.value}", style=left_style)
             content.append(" │ ", style="dim white")
 
@@ -254,10 +281,9 @@ def format_prose_metrics_rich(prose_metrics: ProseMetrics) -> RenderableType:
 
             content.append(f"{right_score.value} ", style=right_style)
             # Right side: filled diamonds first, then empty (normal)
-            if right_filled_count > 0:
-                content.append("◆" * right_filled_count, style=right_style)
-            if right_empty_count > 0:
-                content.append("◇" * right_empty_count, style="dim white")
+            render_diamonds(
+                right_filled_count, right_empty_count, content, right_style, reversed=False
+            )
             content.append(f" {right_name}", style=right_style)
 
             # Only add newline if not the last row
@@ -348,13 +374,20 @@ def format_score_standalone(score: Score) -> str:
     return f"{diamonds} ({score.value})"
 
 
-def format_doc_stats(
-    bytes_count: int, lines: int, paras: int, sents: int, words: int, tokens: int
-) -> RenderableType:
+def format_doc_stats(doc: TextDoc, text: str) -> RenderableType:
     """
-    Format document statistics in two columns.
+    Format document statistics in two columns using TextDoc object.
     """
     from rich.columns import Columns
+    from chopdiff.docs import TextUnit
+
+    # Calculate document statistics from doc object
+    bytes_count = len(text.encode("utf-8"))
+    lines = doc.size(TextUnit.lines)
+    paras = doc.size(TextUnit.paragraphs)
+    sents = doc.size(TextUnit.sentences)
+    words = doc.size(TextUnit.words)
+    tokens = doc.size(TextUnit.tiktokens)
 
     # Calculate responsive layout based on BOX_WIDTH
     # Account for panel borders (2), padding (2), and column separator space
@@ -414,18 +447,14 @@ def format_doc_stats(
 
 def format_complete_analysis(
     prose_metrics: ProseMetrics,
-    bytes_count: int = 0,
-    lines: int = 0,
-    paras: int = 0,
-    sents: int = 0,
-    words: int = 0,
-    tokens: int = 0,
+    doc: TextDoc,
+    text: str,
 ) -> RenderableType:
     """
     Format complete analysis with document stats and prose metrics.
     """
     # Create document summary panel
-    doc_panel = format_doc_stats(bytes_count, lines, paras, sents, words, tokens)
+    doc_panel = format_doc_stats(doc, text)
 
     # Create metrics panel
     metrics_panel = format_prose_metrics_rich(prose_metrics)
@@ -440,6 +469,7 @@ def format_complete_analysis(
 def test_compact_format():
     """Test the complete analysis format with document stats and metrics."""
     from rich.console import Console
+    from chopdiff.docs import TextDoc
 
     from leximetry.eval.metrics_model import (
         Expression,
@@ -480,16 +510,9 @@ def test_compact_format():
         ),
     )
 
+    # Create test text and doc
+    test_text = "This is a sample text for testing the document statistics and formatting. " * 1000
+    test_doc = TextDoc.from_text(test_text)
+
     console = Console()
-    # Test with sample document statistics
-    console.print(
-        format_complete_analysis(
-            test_metrics,
-            bytes_count=272532,
-            lines=4383,
-            paras=597,
-            sents=981,
-            words=23721,
-            tokens=79288,
-        )
-    )
+    console.print(format_complete_analysis(test_metrics, test_doc, test_text))
