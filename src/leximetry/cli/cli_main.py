@@ -18,8 +18,8 @@ from rich import print as rprint
 from rich.console import Console
 
 from leximetry.cli.rich_styles import LEXIMETRY_THEME
-from leximetry.cli.text_output import format_complete_analysis
 from leximetry.eval.evaluate_text import evaluate_text
+from leximetry.eval.report_output import format_complete_analysis
 
 APP_NAME = "leximetry"
 

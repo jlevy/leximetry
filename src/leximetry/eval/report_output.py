@@ -12,16 +12,16 @@ from rich.panel import Panel
 from rich.text import Text
 
 from leximetry.cli.rich_styles import COLOR_SCHEME, GROUP_HEADERS, LEXIMETRY_THEME
+from leximetry.eval.size_stats import REPORT_WIDTH, format_doc_stats
 
 if TYPE_CHECKING:
     from leximetry.eval.metrics_model import ProseMetrics, Score
 
 METRICS_TITLE = "Leximetry"
-REPORT_WIDTH = 72
 
 # Diamond symbols for score visualization
-FILLED_DIAMOND = "◆"
-EMPTY_DIAMOND = " "
+FILLED_SYMBOL = "◆"
+EMPTY_SYMBOL = " "
 
 
 def get_group_metrics(prose_metrics: ProseMetrics) -> dict[str, list[str]]:
@@ -36,13 +36,13 @@ def get_group_metrics(prose_metrics: ProseMetrics) -> dict[str, list[str]]:
     return groups
 
 
-def format_score_viz(value: int, char: str = FILLED_DIAMOND, reversed: bool = False) -> str:
+def format_score_viz(value: int, char: str = FILLED_SYMBOL, reversed: bool = False) -> str:
     """
     Format score as a bar showing filled and empty positions out of 5.
-    Returns filled diamonds followed by empty diamonds, or reversed if requested.
+    Returns filled symbols followed by empty symbols, or reversed if requested.
     """
     filled = char * value
-    empty = EMPTY_DIAMOND * (5 - value)
+    empty = EMPTY_SYMBOL * (5 - value)
 
     if reversed:
         return empty + filled
@@ -251,18 +251,18 @@ def format_prose_metrics_rich(prose_metrics: ProseMetrics) -> RenderableType:
         exp_color = COLOR_SCHEME.get(exp_metrics[i], "white")
         ground_color = COLOR_SCHEME.get(ground_metrics[i], "white")
 
-        # Create diamond displays (right-aligned for left, left-aligned for right)
-        left_diamonds = (EMPTY_DIAMOND * (5 - exp_score.value)) + (FILLED_DIAMOND * exp_score.value)
-        right_diamonds = (FILLED_DIAMOND * ground_score.value) + (
-            EMPTY_DIAMOND * (5 - ground_score.value)
+        # Create symbol displays (right-aligned for left, left-aligned for right)
+        left_symbols = (EMPTY_SYMBOL * (5 - exp_score.value)) + (FILLED_SYMBOL * exp_score.value)
+        right_symbols = (FILLED_SYMBOL * ground_score.value) + (
+            EMPTY_SYMBOL * (5 - ground_score.value)
         )
 
-        # Format the row: right-aligned metric_name score│diamonds│diamonds│score left-aligned metric_name
+        # Format the row: right-aligned metric_name score│symbols│symbols│score left-aligned metric_name
         content.append(f"{exp_metrics[i].title():>18}   {exp_score.value}", style=exp_color)
         content.append("│", style="white")
-        content.append(f"{left_diamonds}", style=exp_color)
+        content.append(f"{left_symbols}", style=exp_color)
         content.append("│", style="white")
-        content.append(f"{right_diamonds}", style=ground_color)
+        content.append(f"{right_symbols}", style=ground_color)
         content.append("│", style="white")
         content.append(f"{ground_score.value}  {ground_metrics[i].title():<17}", style=ground_color)
         content.append("\n")
@@ -281,20 +281,20 @@ def format_prose_metrics_rich(prose_metrics: ProseMetrics) -> RenderableType:
         style_color = COLOR_SCHEME.get(style_metrics[i], "white")
         impact_color = COLOR_SCHEME.get(impact_metrics[i], "white")
 
-        # Create diamond displays (right-aligned for left, left-aligned for right)
-        left_diamonds = (EMPTY_DIAMOND * (5 - style_score.value)) + (
-            FILLED_DIAMOND * style_score.value
+        # Create symbol displays (right-aligned for left, left-aligned for right)
+        left_symbols = (EMPTY_SYMBOL * (5 - style_score.value)) + (
+            FILLED_SYMBOL * style_score.value
         )
-        right_diamonds = (FILLED_DIAMOND * impact_score.value) + (
-            EMPTY_DIAMOND * (5 - impact_score.value)
+        right_symbols = (FILLED_SYMBOL * impact_score.value) + (
+            EMPTY_SYMBOL * (5 - impact_score.value)
         )
 
-        # Format the row: right-aligned metric_name score│diamonds│diamonds│score left-aligned metric_name
+        # Format the row: right-aligned metric_name score│symbols│symbols│score left-aligned metric_name
         content.append(f"{style_metrics[i].title():>18}   {style_score.value}", style=style_color)
         content.append("│", style="white")
-        content.append(f"{left_diamonds}", style=style_color)
+        content.append(f"{left_symbols}", style=style_color)
         content.append("│", style="white")
-        content.append(f"{right_diamonds}", style=impact_color)
+        content.append(f"{right_symbols}", style=impact_color)
         content.append("│", style="white")
         content.append(f"{impact_score.value}  {impact_metrics[i].title():<17}", style=impact_color)
         if i < 2:  # Don't add newline after last row
@@ -362,80 +362,10 @@ def format_score_standalone(score: Score) -> str:
     """
     Format a Score object for rich display.
     """
-    diamonds = format_score_viz(score.value)
+    symbols = format_score_viz(score.value)
     if score.note:
-        return f"{diamonds} ({score.value}) {score.note}"
-    return f"{diamonds} ({score.value})"
-
-
-def format_doc_stats(doc: TextDoc, text: str) -> RenderableType:
-    """
-    Format document statistics in two columns using TextDoc object.
-    """
-    from chopdiff.docs import TextUnit
-    from rich.columns import Columns
-
-    # Calculate document statistics from doc object
-    bytes_count = len(text.encode("utf-8"))
-    lines = doc.size(TextUnit.lines)
-    paras = doc.size(TextUnit.paragraphs)
-    sents = doc.size(TextUnit.sentences)
-    words = doc.size(TextUnit.words)
-    tokens = doc.size(TextUnit.tiktokens)
-
-    # Calculate responsive layout based on REPORT_WIDTH
-    # Account for panel borders (2), padding (4), and column separator space
-    available_width = REPORT_WIDTH - 8
-    left_column_width = available_width // 2
-
-    # Left column: Bytes, Lines, Tokens (labels left-aligned, numbers right-aligned)
-    left_content = Text()
-    bytes_str = f"{bytes_count:,}"
-    left_content.append("Bytes: ", style="hint")
-    left_content.append(bytes_str.rjust(left_column_width - 7), style="bold white")
-    left_content.append("\n")
-
-    lines_str = f"{lines:,}"
-    left_content.append("Lines: ", style="hint")
-    left_content.append(lines_str.rjust(left_column_width - 7), style="bold white")
-    left_content.append("\n")
-
-    tokens_str = f"{tokens:,}"
-    left_content.append("Tokens: ", style="hint")
-    left_content.append(tokens_str.rjust(left_column_width - 8), style="bold white")
-
-    # Right column: Paras, Sentences, Words (also right-aligned)
-    right_column_width = available_width - left_column_width
-    right_content = Text()
-
-    paras_str = f"{paras:,}"
-    right_content.append("Paras: ", style="hint")
-    right_content.append(paras_str.rjust(right_column_width - 7), style="bold white")
-    right_content.append("\n")
-
-    sents_str = f"{sents:,}"
-    right_content.append("Sentences: ", style="hint")
-    right_content.append(sents_str.rjust(right_column_width - 11), style="bold white")
-    right_content.append("\n")
-
-    words_str = f"{words:,}"
-    right_content.append("Words: ", style="hint")
-    right_content.append(words_str.rjust(right_column_width - 7), style="bold white")
-
-    # Create two-column layout with equal columns and minimal padding
-    columns_display = Columns(
-        [left_content, right_content], equal=True, expand=True, padding=(0, 1)
-    )
-
-    doc_panel = Panel(
-        columns_display,
-        title="[panel_title]Size Summary[/panel_title]",
-        border_style="panel_title",
-        padding=(0, 2),
-        width=REPORT_WIDTH,
-    )
-
-    return doc_panel
+        return f"{symbols} ({score.value}) {score.note}"
+    return f"{symbols} ({score.value})"
 
 
 def format_complete_analysis(
