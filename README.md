@@ -1,19 +1,35 @@
 # Leximetry: Qualitative Metrics for Prose
 
-This is a new experimental approach to summarizing some qualitative metrics of writing.
+## What is this?
 
-See [leximetry.md](src/leximetry/docs/leximetry.md) for more on how it works.
+This is an experiment at summarizing some qualitative metrics of writing.
+
+See [leximetry.md](src/leximetry/docs/leximetry.md) for a draft doc with some
+motivation, how it works, and the prompts and scoring rubric.
 
 ## Usage
 
-Install with `uv tool install --upgrade leximetry`. [Using uv](installation.md) is
-highly recommended.
+Install:
+
+```shell
+uv tool install --upgrade leximetry
+```
+
+[Using uv](installation.md) is highly recommended.
+
+To run:
+
+```shell
+leximetry --help
+leximetry some_file.md
+```
 
 ## Example
 
 <div align="center">
 
-<img width="713" alt="Example run of leximetry" src="https://github.com/user-attachments/assets/633d1c1b-4918-4f67-9f7a-472e08fb984a" />
+<img width="713" alt="Example run of leximetry"
+src="https://github.com/user-attachments/assets/633d1c1b-4918-4f67-9f7a-472e08fb984a" />
 
 </div>
 
