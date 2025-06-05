@@ -51,8 +51,8 @@ LEXIMETRY_THEME = Theme(
         "warmth": f"bold {hsl_to_hex('hsl(340, 60%, 73%)')}",
         # Groundedness group - Blue tones
         "factuality": f"bold {hsl_to_hex('hsl(230, 53%, 70%)')}",
-        "thoroughness": f"bold {hsl_to_hex('hsl(200, 50%, 70%)')}",
-        "rigor": f"bold {hsl_to_hex(hsl_string='hsl(185, 38%, 50%)')}",
+        "rigor": f"bold {hsl_to_hex('hsl(200, 50%, 70%)')}",
+        "depth": f"bold {hsl_to_hex(hsl_string='hsl(185, 38%, 50%)')}",
         # Impact group - Mixed colors
         "sensitivity": f"bold {hsl_to_hex('hsl(0, 36%, 62%)')}",
         "accessibility": f"bold {hsl_to_hex('hsl(60, 34%, 70%)')}",
@@ -77,7 +77,7 @@ COLOR_SCHEME = {
     "narrativity": "narrativity",
     "warmth": "warmth",
     "factuality": "factuality",
-    "thoroughness": "thoroughness",
+    "depth": "depth",
     "rigor": "rigor",
     "sensitivity": "sensitivity",
     "accessibility": "accessibility",

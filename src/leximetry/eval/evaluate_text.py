@@ -70,7 +70,9 @@ async def evaluate_single_metric(
     metric_key = metric.name.lower()
 
     elapsed = time.time() - start_time
-    print(f"Evaluated {metric_key} in {format_duration(elapsed)}")
+    print(
+        f"Evaluated {metric_key} (prompt {len(prompt.encode('utf-8'))} bytes) in {format_duration(elapsed)}"
+    )
     return metric_key, score
 
 
@@ -120,7 +122,7 @@ async def evaluate_text_async(text: str, model_name: str = "gpt-4o-mini") -> Pro
             groundedness=Groundedness(
                 factuality=scores.get("factuality", Score(value=0, note="Not evaluated")),
                 rigor=scores.get("rigor", Score(value=0, note="Not evaluated")),
-                thoroughness=scores.get("thoroughness", Score(value=0, note="Not evaluated")),
+                depth=scores.get("depth", Score(value=0, note="Not evaluated")),
             ),
             impact=Impact(
                 accessibility=scores.get("accessibility", Score(value=0, note="Not evaluated")),

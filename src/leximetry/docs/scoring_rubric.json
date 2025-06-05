@@ -85,18 +85,6 @@
       }
     },
     {
-      "name": "Thoroughness",
-      "description": "To what degree does the work include all relevant information that is within scope?",
-      "values": {
-        "0": "Cannot assess. Content missing or less than 3 sentences long.",
-        "1": "Disjointed ideas or a very short text or post where there was no intention of covering more than a thought. Most single posts on Twitter are like this.",
-        "2": "A short post that covers a clear set of ideas but makes no effort to be comprehensive. Many threads on Twitter are like this.",
-        "3": "Carefully written and not short, but without thorough citations, such as a typical long blog post.",
-        "4": "A focused but thorough work, such as a long research paper with full citations.",
-        "5": "Comprehensive and fully researched treatment of the topic. Includes significant numbers of citations and terminology defined within the work."
-      }
-    },
-    {
       "name": "Rigor",
       "description": "Is content logically organized, with terms and statements well defined, reasoning sound, and multiple perspectives or explanations considered?",
       "values": {
@@ -106,6 +94,18 @@
         "3": "Generally logical but could be more precise.",
         "4": "Well-structured with mostly clear reasoning.",
         "5": "Scientifically precise and logical; if objective, assertions have multiple citations from credible sources; if subjective, are thoroughly discussed from multiple perspectives."
+      }
+    },
+    {
+      "name": "Depth",
+      "description": "To what degree does the work include all relevant details that are generally within scope of the topic or narrative? This reflects the level of detail in the work for both non-fiction and fiction.",
+      "values": {
+        "0": "Cannot assess. Content is missing.",
+        "1": "Disjointed ideas or a very short text or post where there is largely a single thought. A one-sentence post on Twitter would have this score.",
+        "2": "A short post that covers a clear set of ideas but makes no effort to be comprehensive. Many short blog posts with a few ideas or threads on Twitter are like this. Writing of only a few paragraphs but still containing some detail and nuance should have this score.",
+        "3": "Carefully written and with at least 2 pages of highly dense technical material or at least 3-4 pages of typical text. It may or may not have citations or footnotes. For example, it could be a long blog post. For fiction, it should have detail and be several pages, like a short story.",
+        "4": "For nonfiction, this means a focused but thorough work, such as a long research paper complete with related work, many citations and deep coverage of specifics. For fiction, it should have significant detail and be at least 10 pages long.",
+        "5": "For nonfiction, this means a comprehensive and fully researched treatment of the topic. Includes a full treatment with great detail, significant numbers of citations and key terminology defined within the work. For fiction, this is an extensive and detailed creative work, such as a complete and internally consistent, well-written novel or fantasy book with many characters."
       }
     },
     {

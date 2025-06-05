@@ -83,8 +83,8 @@ def format_notes_section(notes: list[tuple[str, str]]) -> RenderableType | None:
         ("__EXPRESSION_HEADER", "__GROUNDEDNESS_HEADER"),
         # Expression vs Groundedness metrics
         ("Clarity", "Factuality"),
-        ("Coherence", "Thoroughness"),
-        ("Sincerity", "Rigor"),
+        ("Coherence", "Rigor"),
+        ("Sincerity", "Depth"),
         # Group headers for second section
         ("__STYLE_HEADER", "__IMPACT_HEADER"),
         # Style vs Impact metrics
@@ -494,7 +494,7 @@ def test_compact_format():
         groundedness=Groundedness(
             factuality=Score(value=2, note=""),
             rigor=Score(value=3, note=""),
-            thoroughness=Score(value=3, note=""),
+            depth=Score(value=3, note=""),
         ),
         impact=Impact(
             accessibility=Score(value=3, note=""),

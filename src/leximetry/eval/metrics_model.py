@@ -69,8 +69,8 @@ class Style(BaseModel):
 
 class Groundedness(BaseModel):
     factuality: Score = Field(default_factory=lambda: Score(value=0))
-    thoroughness: Score = Field(default_factory=lambda: Score(value=0))
     rigor: Score = Field(default_factory=lambda: Score(value=0))
+    depth: Score = Field(default_factory=lambda: Score(value=0))
 
 
 class Impact(BaseModel):
@@ -173,8 +173,8 @@ def test_prose_metrics():
         ),
         groundedness=Groundedness(
             factuality=Score(value=3, note="Some verifiable facts"),
-            thoroughness=Score(value=2, note="Brief treatment"),
             rigor=Score(value=4, note="Well-structured reasoning"),
+            depth=Score(value=2, note="Brief treatment"),
         ),
         impact=Impact(
             sensitivity=Score(value=4, note="Some sensitive content"),

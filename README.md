@@ -3,7 +3,7 @@
 # Leximetry: Qualitative Metrics for Prose
 
 Joshua Levy\
-*v0.1.0 (June 2025) – Draft!*
+*v0.1.1 (June 2025) – Draft!*
 
 ## Scope
 
@@ -13,8 +13,9 @@ written works more reproducible with the use of LLMs.
 
 This short paper gives background, scores, and a rubric.
 
-It is written in a way that it can be used with an LLM. It also used by the
-[`leximetry`](https://github.com/jlevy/leximetry) command-line tool.
+It is written in a way that it can be used by an LLM or a human.
+The [`leximetry`](https://github.com/jlevy/leximetry) command-line tool uses the metrics
+and rubric as defined here.
 
 ## Motivation
 
@@ -41,7 +42,7 @@ writing is high quality.
 In short, except for the low-level, enforceable details, we tend to infer the quality of
 writing implicitly.
 
-## Can Quality Be Measured?
+### Can Quality Be Measured?
 
 While we implicitly often recognize quality, measuring it explicitly is elusive.
 It's contextual, subjective, and not quantitative.
@@ -57,7 +58,7 @@ higher volumes. When an evaluation that previously was considered subjective can
 performed consistently across many documents, it makes comparisons along these
 dimensions easier, better defined, and potentially useful in new ways.
 
-## Measurements are Imperfect but Useful
+### Measurements are Imperfect but Useful
 
 Scores are inherently reductive.
 But this brevity has value for readers to assess the nature of content rapidly,
@@ -162,14 +163,13 @@ This category covers the use of facts and sound reasoning in the content.
    done to a reasonable depth, i.e. an assessment based on simple online fact checking
    and review of the expertise of the writer and citations.
 
-8. **Thoroughness:** To what degree does the work include all relevant information that
-   is within scope? Note something can be narrow but still thorough, like a research
-   paper.
-
-9. **Rigor:** Is content logically organized, with terms and statements well defined,
+8. **Rigor:** Is content logically organized, with terms and statements well defined,
    reasoning sound, and multiple perspectives or explanations considered?
    Note this is distinct from subjectivity; it's certainly possible for subjective
    topics to be discussed with some rigor.
+
+9. **Depth:** To what degree does the work include all relevant information that is
+   within scope? Note something can be narrow but still thorough, like a research paper.
 
 ### Impact
 
@@ -479,30 +479,6 @@ An example of the output for Sensitivity might be:
 
   - **Score 5:** Proven and consensus facts verified by multiple third-party sources.
 
-- **Metric:** *Thoroughness*
-
-  - **Description:** To what degree does the work include all relevant information that
-    is within scope?
-
-  - **Score 0:** Cannot assess.
-    Content missing or less than 3 sentences long.
-
-  - **Score 1:** Disjointed ideas or a very short text or post where there was no
-    intention of covering more than a thought.
-    Most single posts on Twitter are like this.
-
-  - **Score 2:** A short post that covers a clear set of ideas but makes no effort to be
-    comprehensive. Many threads on Twitter are like this.
-
-  - **Score 3:** Carefully written and not short, but without thorough citations, such
-    as a typical long blog post.
-
-  - **Score 4:** A focused but thorough work, such as a long research paper with full
-    citations.
-
-  - **Score 5:** Comprehensive and fully researched treatment of the topic.
-    Includes significant numbers of citations and terminology defined within the work.
-
 - **Metric:** *Rigor*
 
   - **Description:** Is content logically organized, with terms and statements well
@@ -522,6 +498,41 @@ An example of the output for Sensitivity might be:
   - **Score 5:** Scientifically precise and logical; if objective, assertions have
     multiple citations from credible sources; if subjective, are thoroughly discussed
     from multiple perspectives.
+
+- **Metric:** *Depth*
+
+  - **Description:** To what degree does the work include all relevant details that are
+    generally within scope of the topic or narrative?
+    This reflects the level of detail in the work for both non-fiction and fiction.
+
+  - **Score 0:** Cannot assess.
+    Content is missing.
+
+  - **Score 1:** Disjointed ideas or a very short text or post where there is largely a
+    single thought. A one-sentence post on Twitter would have this score.
+
+  - **Score 2:** A short post that covers a clear set of ideas but makes no effort to be
+    comprehensive. Many short blog posts with a few ideas or threads on Twitter are like
+    this. Writing of only a few paragraphs but still containing some detail and nuance
+    should have this score.
+
+  - **Score 3:** Carefully written and with at least 2 pages of highly dense technical
+    material or at least 3-4 pages of typical text.
+    It may or may not have citations or footnotes.
+    For example, it could be a long blog post.
+    For fiction, it should have detail and be several pages, like a short story.
+
+  - **Score 4:** For nonfiction, this means a focused but thorough work, such as a long
+    research paper complete with related work, many citations and deep coverage of
+    specifics. For fiction, it should have significant detail and be at least 10 pages
+    long.
+
+  - **Score 5:** For nonfiction, this means a comprehensive and fully researched
+    treatment of the topic.
+    Includes a full treatment with great detail, significant numbers of citations and
+    key terminology defined within the work.
+    For fiction, this is an extensive and detailed creative work, such as a complete and
+    internally consistent, well-written novel or fantasy book with many characters.
 
 - **Metric:** *Sensitivity*
 
@@ -601,6 +612,7 @@ An example of the output for Sensitivity might be:
 
   - **Score 5:** Likely will be of of interest in decades, like an encyclopedia article
     or a critically acclaimed book.
+
 
 <!-- END INCLUDE: leximetry.md -->
 
