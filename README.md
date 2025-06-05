@@ -13,8 +13,7 @@ highly recommended.
 
 <div align="center">
 
-<img width="462" alt="Example run of leximetry"
-src="https://github.com/user-attachments/assets/e9c3ac7c-ec4f-485c-955f-b607bf744f18" />
+<img width="713" alt="Example run of leximetry" src="https://github.com/user-attachments/assets/633d1c1b-4918-4f67-9f7a-472e08fb984a" />
 
 </div>
 
