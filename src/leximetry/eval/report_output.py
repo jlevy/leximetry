@@ -258,13 +258,15 @@ def format_prose_metrics_rich(prose_metrics: ProseMetrics) -> RenderableType:
         )
 
         # Format the row: right-aligned metric_name score│symbols│symbols│score left-aligned metric_name
-        content.append(f"{exp_metrics[i].title():>18}   {exp_score.value}", style=exp_color)
+        content.append(f"{exp_metrics[i].title():>18}  {exp_score.value} ", style=exp_color)
         content.append("│", style="white")
         content.append(f"{left_symbols}", style=exp_color)
         content.append("│", style="white")
         content.append(f"{right_symbols}", style=ground_color)
         content.append("│", style="white")
-        content.append(f"{ground_score.value}  {ground_metrics[i].title():<17}", style=ground_color)
+        content.append(
+            f" {ground_score.value}  {ground_metrics[i].title():<17}", style=ground_color
+        )
         content.append("\n")
 
     # Separator row
@@ -290,13 +292,15 @@ def format_prose_metrics_rich(prose_metrics: ProseMetrics) -> RenderableType:
         )
 
         # Format the row: right-aligned metric_name score│symbols│symbols│score left-aligned metric_name
-        content.append(f"{style_metrics[i].title():>18}   {style_score.value}", style=style_color)
+        content.append(f"{style_metrics[i].title():>18}  {style_score.value} ", style=style_color)
         content.append("│", style="white")
         content.append(f"{left_symbols}", style=style_color)
         content.append("│", style="white")
         content.append(f"{right_symbols}", style=impact_color)
         content.append("│", style="white")
-        content.append(f"{impact_score.value}  {impact_metrics[i].title():<17}", style=impact_color)
+        content.append(
+            f" {impact_score.value}  {impact_metrics[i].title():<17}", style=impact_color
+        )
         if i < 2:  # Don't add newline after last row
             content.append("\n")
 
