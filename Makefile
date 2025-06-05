@@ -34,4 +34,4 @@ clean:
 
 gendocs:
 	uv run python -m src.leximetry.docs.regen_rubric
-	uv run python -m src.leximetry.docs.update_readme
+	# uv run python -m src.leximetry.docs.update_readme
