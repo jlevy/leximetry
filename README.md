@@ -8,10 +8,11 @@ Joshua Levy\
 ## Scope
 
 This document is a draft of a few general but practical *qualitative metrics* for
-assessing prose. The goal is to make traditionally implicit, manual assessments of
-written works more reproducible with the use of LLMs.
+assessing prose. The goal is to make relatively nuanced but reproducible and
+easy-to-understand assessments of written works with the use of LLMs.
 
 This short paper gives background, scores, and a rubric.
+This is a draft that is likely to evolve.
 
 It is written in a way that it can be used by an LLM or a human.
 The [`leximetry`](https://github.com/jlevy/leximetry) command-line tool uses the metrics
@@ -21,55 +22,58 @@ and rubric as defined here.
 
 ### What is Quality Writing?
 
-Some attributes of prose are easy to evaluate objectively.
-Spelling, formatting, and grammar can be fixed easily and automatically by software.
-Writers and editors have long turned to guides like Strunk and White or the *Chicago
-Manual of Style* for guidance on clear writing.
-And within organizations or publications, style guides are a way to systematize the use
-of language and conventions.
+Some attributes of good writing are easy to evaluate objectively.
+Rules for spelling and grammar are clear enough that they can be checked with software.
+Writers and editors have traditionally used guides like the *Chicago Manual of Style* or
+internal organizational style guides to enforce conventions, especially for minute
+details of usage, capitalization, or punctuation.
 
-Most of the time, readers implicitly sense certain attributes of a work from the text
-itself as well as from context, like the source (such as recognizing a well-known
-magazine or a known publisher or a blurb on a book cover) or the appearance of the work
-(such as a book that seems designed or printed well, or whether it is on a website with
-intrusive ads).
+However, higher-level standards of quality in writing, like creativity or clarity, are
+more subtle to evaluate or even to define.
 
-In established publications or journals, quality is often maintained by traditions and
-processes like editorial review, fact checking, and copy editing.
-Over time, especially for books, we use popularity and reviews as signals of what
-writing is high quality.
+We do know good writing arises from the taste, skill, and expertise of good writers and
+editors. And that for both fiction and nonfiction, many aspects of quality improve when
+supported by traditions and processes like copy editing, fact checking, and editorial
+review.
 
-In short, except for the low-level, enforceable details, we tend to infer the quality of
-writing implicitly.
+In fact, because it takes so much time and effort to read something and assess its
+quality, we tend to look up front for proxy signals like reputation and recommendation.
+We glance first at *who* wrote it and what publication it's from to get a sense of what
+expertise and efforts were involved in its creation.
 
 ### Can Quality Be Measured?
 
-While we implicitly often recognize quality, measuring it explicitly is elusive.
-It's contextual, subjective, and not quantitative.
+Although quality is hard to define in general, there are certain *qualitative
+attributes* of writing that have more precise meanings.
 
-However, there are *qualitative attributes* of writing, such as clarity, coherence,
-factuality, rigor, or warmth, that are both important and much easier to define.
+Some attributes—like artistry or creativity—are quite subjective.
+But others—such as clarity, coherence, factuality, or warmth—can be described more
+precisely.
 
 Today, with LLMs, what can be defined precisely can be measured systematically.
 
 LLMs do not eliminate the inherent difficulties and nuances of evaluating text.
-However, they *do* make even imprecise measurement *more systematic* and possible in
-higher volumes. When an evaluation that previously was considered subjective can be
-performed consistently across many documents, it makes comparisons along these
-dimensions easier, better defined, and potentially useful in new ways.
+However, they *do* make traditionally imprecise measurement *more systematic* and
+possible in higher volumes.
+
+When an evaluation that previously was considered subjective can be performed
+consistently across many documents, it makes comparisons along these dimensions easier,
+better defined, and potentially useful in new ways.
 
 ### Measurements are Imperfect but Useful
 
 Scores are inherently reductive.
-But this brevity has value for readers to assess the nature of content rapidly,
-especially online. Measurements of quality are increasingly necessary to help us filter
-out content we don't wish to read.
-These measurements can also be used to assist LLM-based tools in producing better
-output.
+But brevity has value when we want to assess something rapidly.
+Especially online, indications of quality are increasingly needed to help us filter out
+content we don't wish to read.
+In addition, quality evaluations are key for assisting LLM-based tools in producing
+better output.
 
-My hope is that if we find ways to reveal metrics or visualizations of metrics like this
-online or in apps, it would spend our reading time more wisely—and perhaps help us find
-common ground in the fractured and confusing world of online content.
+No analytical scheme will map the ephemeral, intuitive landscape of creative writing.
+But my hope is that if we find ways to reveal *some* metrics (or visualizations of
+metrics) like this online or in apps, it would spend our reading time more wisely—and
+perhaps help us find common ground in today's fractured and confusing world of online
+content.
 
 ## The General Quality Metrics
 
@@ -244,13 +248,13 @@ This does lead to excluding some attributes:
 There are a few other attributes I've considered and might make sense to add to the
 list:
 
-- *Facetiousness* could be helpful.
-  *Humor* may seem like a good attribute but it's a confusing name for this dimension,
+- *Seriousness* or *facetiousness* could be helpful.
+  (*Humor* may seem like a good attribute but it's a confusing name for this dimension,
   since it implies perceptions of the reader.
-  ("Maybe that's a joke but it's not funny!") Also, although one might think
-  facetiousness is the opposite of sincerity, it's actually a distinct dimension.
-  For example, something can be facetious and sincere (like a humorous compliment) or
-  facetious and insincere (like a trolling comment).
+  "Maybe that's a joke but it's not funny!") Also, although one might think seriousness
+  is close to sincerity, it's actually a distinct dimension.
+  For example, something can be facetious (not serious) and sincere (like a humorous
+  compliment) or facetious and insincere (like a trolling comment).
 
 - *Utility* could possibly distinguish artistry or entertainment from practical, useful
   information.
