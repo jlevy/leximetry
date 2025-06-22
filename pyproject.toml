@@ -46,6 +46,7 @@ dependencies = [
     "chopdiff>=0.2.1",
     "colour>=0.1.5",
     "prettyfmt>=0.4.0",
+    "aiolimiter>=1.2.1",
 ]
 
 

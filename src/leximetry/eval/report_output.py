@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 METRICS_TITLE = "Leximetry"
 
-# Diamond symbols for score visualization
+# Symbols for score visualization
 FILLED_SYMBOL = "◆"
 EMPTY_SYMBOL = " "
 

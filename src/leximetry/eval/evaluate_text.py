@@ -18,6 +18,7 @@ from leximetry.eval.metrics_model import (
     Style,
     load_scoring_rubric,
 )
+from leximetry.utils.aio_limited import gather_limited
 
 
 async def evaluate_single_metric(
@@ -101,8 +102,8 @@ async def evaluate_text_async(text: str, model_name: str = "gpt-4o-mini") -> Pro
             evaluate_single_metric(text, metric, model) for metric in scoring_rubric.metrics
         ]
 
-        # Run all metric evaluations in parallel
-        metric_results = await asyncio.gather(*metric_tasks)
+        # Run all metric evaluations with rate limiting
+        metric_results = await gather_limited(*metric_tasks)
 
         # Assemble results into ProseMetrics object
         scores = dict(metric_results)
