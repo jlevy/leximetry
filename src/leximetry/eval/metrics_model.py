@@ -74,9 +74,7 @@ class Groundedness(BaseModel):
 
 
 class Impact(BaseModel):
-    sensitivity: Score = Field(
-        default_factory=lambda: Score(value=0)
-    )  # Maps to "Sensitivity" in rubric
+    sensitivity: Score = Field(default_factory=lambda: Score(value=0))
     accessibility: Score = Field(default_factory=lambda: Score(value=0))
     longevity: Score = Field(default_factory=lambda: Score(value=0))
 
