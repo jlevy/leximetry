@@ -15,7 +15,7 @@ Install:
 uv tool install --upgrade leximetry
 ```
 
-[Using uv](installation.md) is highly recommended.
+[Using uv](docs/installation.md) is highly recommended.
 
 To run:
 
@@ -37,11 +37,11 @@ src="https://github.com/user-attachments/assets/633d1c1b-4918-4f67-9f7a-472e08fb
 
 ## Project Docs
 
-For how to install uv and Python, see [installation.md](installation.md).
+For how to install uv and Python, see [installation.md](docs/installation.md).
 
-For development workflows, see [development.md](development.md).
+For development workflows, see [development.md](docs/development.md).
 
-For instructions on publishing to PyPI, see [publishing.md](publishing.md).
+For instructions on publishing to PyPI, see [publishing.md](docs/publishing.md).
 
 * * *
 
