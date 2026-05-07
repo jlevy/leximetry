@@ -1,5 +1,5 @@
 # Makefile for easy development workflows.
-# See development.md for docs.
+# See docs/development.md for docs.
 # Note GitHub Actions call uv directly, not this Makefile.
 
 .DEFAULT_GOAL := default
@@ -9,7 +9,7 @@
 default: install lint test
 
 install:
-	uv sync --all-extras --dev
+	uv sync --all-extras
 
 lint:
 	uv run python devtools/lint.py
@@ -18,7 +18,7 @@ test:
 	uv run pytest
 
 upgrade:
-	uv sync --upgrade --all-extras --dev
+	uv sync --upgrade --all-extras
 
 build:
 	uv build
@@ -34,4 +34,3 @@ clean:
 
 gendocs:
 	uv run python -m src.leximetry.docs.regen_rubric
-	# uv run python -m src.leximetry.docs.update_readme

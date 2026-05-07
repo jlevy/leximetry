@@ -26,30 +26,39 @@ class Score(BaseModel):
         - "3 (Contains speculations about the authors cat as well as factual content on C++ programming.)"
         - "1"
         - "4 (Clear reasoning but some gaps)"
+
+        Out-of-range values (>5) and unparsable input both fall back to
+        Score(value=0, note=<original text>) rather than raising.
         """
+        original = text
         text = text.strip()
 
-        # Try to match "SCORE (EXPLANATION)" format
-        match = re.match(r"^(\d+)\s*\(([^)]*)\)\s*$", text)
-        if match:
-            value = int(match.group(1))
-            note = match.group(2).strip()
+        def _build(value: int, note: str) -> Score:
+            # Out-of-range -> treat as unparsable so we never raise on LLM noise.
+            if value < 0 or value > 5:
+                return cls(value=0, note=original)
             return cls(value=value, note=note)
+
+        # Try to match "SCORE (EXPLANATION)" format. Greedy .+ lets the note
+        # contain parentheses (e.g. "3 (Mixed (unclear) sources)") by anchoring
+        # on the final ')'.
+        match = re.match(r"^(\d+)\s*\((.+)\)\s*$", text, re.DOTALL)
+        if match:
+            return _build(int(match.group(1)), match.group(2).strip())
 
         # Try to match just a number
         match = re.match(r"^(\d+)\s*$", text)
         if match:
-            value = int(match.group(1))
-            return cls(value=value, note="")
+            return _build(int(match.group(1)), "")
 
         # Try to extract first number if format is unclear
         numbers = re.findall(r"\d+", text)
         if numbers:
             value = int(numbers[0])
-            # Try to extract text after the number as explanation
-            # Remove everything up to and including the first number and any following punctuation/spaces
+            # Remove everything up to and including the first number and any
+            # following punctuation/spaces
             remaining = re.sub(r"^.*?\d+\s*[:\-\(\)\s]*", "", text).strip()
-            return cls(value=value, note=remaining)
+            return _build(value, remaining)
 
         # Fallback: return 0 with the original text as note
         return cls(value=0, note=text)
@@ -74,9 +83,7 @@ class Groundedness(BaseModel):
 
 
 class Impact(BaseModel):
-    sensitivity: Score = Field(
-        default_factory=lambda: Score(value=0)
-    )  # Maps to "Sensitivity" in rubric
+    sensitivity: Score = Field(default_factory=lambda: Score(value=0))
     accessibility: Score = Field(default_factory=lambda: Score(value=0))
     longevity: Score = Field(default_factory=lambda: Score(value=0))
 
@@ -155,6 +162,36 @@ def test_score_parsing():
     score6 = Score.parse("unclear input")
     assert score6.value == 0
     assert score6.note == "unclear input"
+
+    # Empty string
+    score_empty = Score.parse("")
+    assert score_empty.value == 0
+    assert score_empty.note == ""
+
+    # Whitespace-only
+    score_ws = Score.parse("   \n\t  ")
+    assert score_ws.value == 0
+
+    # Multi-line note
+    score_multi = Score.parse("5 (Well written.\nNo language errors.)")
+    assert score_multi.value == 5
+    assert "Well written." in score_multi.note
+    assert "No language errors." in score_multi.note
+
+    # Parentheses inside the note (LLM uses parenthetical asides)
+    score_nested = Score.parse("3 (Mixed (unclear) sources)")
+    assert score_nested.value == 3
+    assert score_nested.note == "Mixed (unclear) sources"
+
+    # Out-of-range value falls back to 0 with original text preserved.
+    score_huge = Score.parse("7 (out of range)")
+    assert score_huge.value == 0
+    assert score_huge.note == "7 (out of range)"
+
+    # 0 (cannot assess) is a legitimate value, not an error.
+    score_zero = Score.parse("0 (Cannot assess.)")
+    assert score_zero.value == 0
+    assert score_zero.note == "Cannot assess."
 
 
 def test_prose_metrics():

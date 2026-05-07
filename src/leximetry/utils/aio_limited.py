@@ -1,16 +1,12 @@
-from __future__ import annotations
-
 import asyncio
 from collections.abc import Coroutine
-from typing import TypeVar, overload
+from typing import overload
 
 from aiolimiter import AsyncLimiter
 
-T = TypeVar("T")
-
 
 @overload
-async def gather_limited(
+async def gather_limited[T](
     *coros: Coroutine[None, None, T],
     max_concurrent: int = 5,
     max_rps: float = 5.0,
@@ -19,7 +15,7 @@ async def gather_limited(
 
 
 @overload
-async def gather_limited(
+async def gather_limited[T](
     *coros: Coroutine[None, None, T],
     max_concurrent: int = 5,
     max_rps: float = 5.0,
@@ -27,7 +23,7 @@ async def gather_limited(
 ) -> list[T | BaseException]: ...
 
 
-async def gather_limited(
+async def gather_limited[T](
     *coros: Coroutine[None, None, T],
     max_concurrent: int = 5,
     max_rps: float = 5.0,
