@@ -4,53 +4,62 @@ This is how to publish a Python package to [**PyPI**](https://pypi.org/) from Gi
 Actions, when using the
 [**simple-modern-uv**](https://github.com/jlevy/simple-modern-uv) template.
 
-Thanks to [the dynamic versioning
-plugin](https://github.com/ninoseki/uv-dynamic-versioning/) and the
-[`publish.yml` workflow](https://github.com/jlevy/simple-modern-uv/blob/main/template/.github/workflows/publish.yml),
+Thanks to
+[the dynamic versioning plugin](https://github.com/ninoseki/uv-dynamic-versioning/) and
+the [`publish.yml`
+workflow](https://github.com/jlevy/simple-modern-uv/blob/main/template/.github/workflows/publish.yml),
 you can simply create tagged releases (using standard format for the tag name, e.g.
 `v0.1.0`) on GitHub and the tag will trigger a release build, which then uploads it to
 PyPI.
 
-### How to Publish the First Time
+### First-Time Setup
 
 This part is a little confusing the first time.
 Here is the simplest way to do it.
 For the purposes of this example replace OWNER and PROJECT with the right values.
 
+**Note:** These steps assume you already have a GitHub repo with your code pushed. If
+you used [`uvx uvtemplate`](https://github.com/jlevy/uvtemplate), it handles repo
+creation for you. If you're setting up manually, create an **empty** GitHub repo (no
+README, no .gitignore, no license — the template already provides these) and push your
+code to it. See the
+[README](https://github.com/jlevy/simple-modern-uv#option-2-use-copier-and-git-yourself)
+for details.
+
 1. **Get a PyPI account** at [pypi.org](https://pypi.org/) and sign in.
 
-2. **Pick a name for the project** that isn't already taken.
+2. **Pick a name for the project** that isn’t already taken.
 
    - Go to `https://pypi.org/project/PROJECT` to see if another project with that name
      already exits.
 
-   - If needed, update your `pyproject.yml` with the correct name.
+   - If needed, update your `pyproject.toml` with the correct name.
 
 3. **Authorize** your repository to publish to PyPI:
 
    - Go to [the publishing settings page](https://pypi.org/manage/account/publishing/).
 
-   - Find "Trusted Publisher Management" and register your GitHub repo as a new
-     "pending" trusted publisher
+   - Find “Trusted Publisher Management” and register your GitHub repo as a new
+     “pending” trusted publisher.
 
    - Enter the project name, repo owner, repo name, and `publish.yml` as the workflow
-     name. (You can leave the "environment name" field blank.)
+     name. (You can leave the “environment name” field blank.)
 
 4. **Create a release** on GitHub:
 
-   - Commit code and make sure it's running correctly.
+   - Commit code and make sure it’s running correctly.
 
    - Go to your GitHub project page, then click on Actions tab.
 
    - Confirm all tests are passing in the last CI workflow.
-     (If you want, you can even publish this template when it's empty as just a stub
+     (If you want, you can even publish this template when it’s empty as just a stub
      project, to try all this out.)
 
    - Go to your GitHub project page, click on Releases.
 
    - Fill in the tag and the release name.
      Select to create a new tag, and pick a version.
-     A good option is `v0.1.0`. (It's wise to have it start with a `v`.)
+     A good option is `v0.1.0`. (It’s wise to have it start with a `v`.)
 
    - Submit to create the release.
 
@@ -60,10 +69,143 @@ For the purposes of this example replace OWNER and PROJECT with the right values
 
    - If it succeeds, you should see it appear at `https://pypi.org/project/PROJECT`.
 
-### How to Publish Subsequent Releases
+### Publishing Subsequent Releases
 
-Just create a new release!
-Everything is the same as the last two steps above.
+Follow this checklist for each new release.
+
+#### Pre-Release Checklist
+
+1. **Verify all changes are committed and pushed:**
+
+   ```shell
+   git status
+   git log origin/main..HEAD  # should be empty if pushed
+   ```
+
+2. **Run linting and tests locally:**
+
+   ```shell
+   make lint
+   make test
+   ```
+
+3. **Confirm CI is passing:**
+
+   ```shell
+   gh run list --limit 3
+   ```
+
+   Or check the Actions tab on GitHub.
+
+4. **Determine the new version number:**
+
+   ```shell
+   # Check current/latest version:
+   gh release list --limit 1
+   ```
+
+   Use [semantic versioning](https://semver.org/):
+
+   - **Patch** (e.g., `v0.5.8` → `v0.5.9`): Bug fixes, minor changes
+
+   - **Minor** (e.g., `v0.5.9` → `v0.6.0`): New features, backward-compatible
+
+   - **Major** (e.g., `v0.6.0` → `v1.0.0`): Breaking changes
+
+#### Create the Release
+
+5. **Generate release notes content:**
+
+   Review changes since the last release:
+
+   ```shell
+   # Get the last release tag:
+   LAST_TAG=$(gh release list --limit 1 --json tagName -q '.[0].tagName')
+   
+   # View commits since last release:
+   git log ${LAST_TAG}..HEAD --oneline
+   
+   # View full diff:
+   git diff ${LAST_TAG}..HEAD
+   ```
+
+6. **Create the release with `gh`:**
+
+   ```shell
+   NEW_TAG="vX.Y.Z"  # Replace with actual version
+   LAST_TAG=$(gh release list --limit 1 --json tagName -q '.[0].tagName')
+   
+   gh release create "${NEW_TAG}" \
+     --title "${NEW_TAG}" \
+     --notes "$(cat <<'EOF'
+   ## What's Changed
+   
+   [Summarize changes here--see format guide below]
+   
+   ### Full Changelog
+   
+   https://github.com/OWNER/PROJECT/compare/${LAST_TAG}...${NEW_TAG}
+   EOF
+   )"
+   ```
+
+   Alternatively, use `--generate-notes` for GitHub’s auto-generated notes, or
+   `--notes-file FILENAME` to read from a file.
+
+7. **Verify the release published successfully:**
+
+   ```shell
+   # Check the release workflow:
+   gh run list --workflow=publish.yml --limit 1
+   
+   # Verify on PyPI (may take a minute):
+   # https://pypi.org/project/PROJECT
+   ```
+
+### Release Notes Format
+
+Use this structure for release notes:
+
+```markdown
+## What's Changed
+
+### Bug Fixes
+
+**Short title of fix**
+
+Description of what was fixed and why it matters.
+
+### New Features
+
+**Short title of feature**
+
+Description of the new capability.
+
+### Breaking Changes
+
+**Short title of breaking change**
+
+Description of what changed and how to migrate.
+
+### Full Changelog
+
+https://github.com/OWNER/PROJECT/compare/vPREVIOUS...vNEW
+```
+
+Guidelines:
+
+- Use `## What's Changed` as the top-level heading.
+
+- Group changes under `### Bug Fixes`, `### New Features`, `### Breaking Changes`, etc.
+  as appropriate.
+
+- Use `**bold**` for short titles of individual changes.
+
+- Include technical details only when helpful for users.
+
+- Always include the Full Changelog compare link at the end.
+
+- For small releases, a simple bullet list is acceptable instead of full sections.
 
 * * *
 
